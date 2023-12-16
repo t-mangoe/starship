@@ -28,6 +28,7 @@ pub mod erlang;
 pub mod fennel;
 pub mod fill;
 pub mod fossil_branch;
+pub mod fossil_metrics;
 pub mod gcloud;
 pub mod git_branch;
 pub mod git_commit;
@@ -83,6 +84,7 @@ pub mod sudo;
 pub mod swift;
 pub mod terraform;
 pub mod time;
+pub mod typst;
 pub mod username;
 pub mod v;
 pub mod vagrant;
@@ -158,6 +160,8 @@ pub struct FullConfig<'a> {
     fill: fill::FillConfig<'a>,
     #[serde(borrow)]
     fossil_branch: fossil_branch::FossilBranchConfig<'a>,
+    #[serde(borrow)]
+    fossil_metrics: fossil_metrics::FossilMetricsConfig<'a>,
     #[serde(borrow)]
     gcloud: gcloud::GcloudConfig<'a>,
     #[serde(borrow)]
@@ -265,6 +269,8 @@ pub struct FullConfig<'a> {
     terraform: terraform::TerraformConfig<'a>,
     #[serde(borrow)]
     time: time::TimeConfig<'a>,
+    #[serde(borrow)]
+    typst: typst::TypstConfig<'a>,
     #[serde(borrow)]
     username: username::UsernameConfig<'a>,
     #[serde(borrow)]

@@ -35,6 +35,7 @@ pub const ALL_MODULES: &[&str] = &[
     "fennel",
     "fill",
     "fossil_branch",
+    "fossil_metrics",
     "gcloud",
     "git_branch",
     "git_commit",
@@ -89,6 +90,7 @@ pub const ALL_MODULES: &[&str] = &[
     "swift",
     "terraform",
     "time",
+    "typst",
     "username",
     "vagrant",
     "vcsh",
@@ -231,7 +233,7 @@ where
                 strs.into_iter()
                     .chain(std::iter::once(fill.ansi_string(fill_size)))
             })
-            .chain(current.into_iter())
+            .chain(current)
             .collect::<Vec<AnsiString>>()
     }
 }
