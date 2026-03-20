@@ -14,11 +14,7 @@ Essa predefinição altera os símbolos para cada módulo usar símbolos com Ner
 
 Essa predefinição altera os símbolos para vários módulos para que nenhum utilize símbolos das Nerd Fonts em nenhum lugar no prompt.
 
-::: tip
-
-Esta predefinição se tornará padrão em [uma futura release do starship](https://github.com/starship/starship/pull/3544).
-
-:::
+> [!TIP] This preset will become the default preset [in a future release of starship](https://github.com/starship/starship/pull/3544).
 
 [Clique para visualizar a predefinição de sem Nerd Font](./no-nerd-font)
 
@@ -63,3 +59,21 @@ Esta personalização é inspirada em [M365Princess](https://github.com/JanDeDob
 Este preset é inspirado por  [tokyo-night-vscode-theme](https://github.com/enkia/tokyo-night-vscode-theme).
 
 [![Captura de tela de Tokyo Night preset](/presets/img/tokyo-night.png "Clique para visualizar Tokyo Night preset")](./tokyo-night)
+
+## [Gruvbox Rainbow](./gruvbox-rainbow.md)
+
+This preset is heavily inspired by [Pastel Powerline](./pastel-powerline.md), and [Tokyo Night](./tokyo-night.md).
+
+[![Screenshot of Gruvbox Rainbow preset](/presets/img/gruvbox-rainbow.png "Click to view Gruvbox Rainbow preset")](./gruvbox-rainbow)
+
+## [Jetpack](./jetpack.md)
+
+This is a pseudo minimalist preset inspired by the [geometry](https://github.com/geometry-zsh/geometry) and [spaceship](https://github.com/spaceship-prompt/spaceship-prompt) prompts.
+
+[![Captura de tela do Jetpack preset](/presets/img/jetpack.png "Click to view Jetpack preset")](./jetpack)
+
+## [Catppuccin Powerline](./catppuccin-powerline.md)
+
+This preset is a minimally modified version of [Gruvbox Rainbow](./gruvbox-rainbow.md) using the [Catppuccin](https://github.com/catppuccin/catppuccin) theme palette.
+
+[![Screenshot of Catppuccin Powerline preset](/presets/img/catppuccin-powerline.png "Click to view Catppuccin Powerline preset")](./catppuccin-powerline)

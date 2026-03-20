@@ -1,5 +1,5 @@
 use super::utils::truncate::truncate_text;
-use super::{Context, Module, ModuleConfig};
+use super::{Context, Module, ModuleConfig, vcs};
 
 use crate::configs::pijul_channel::PijulConfig;
 use crate::formatter::StringFormatter;
@@ -8,22 +8,15 @@ use crate::formatter::StringFormatter;
 ///
 /// Will display the channel lame if the current directory is a pijul repo
 pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
-    let is_repo = context
-        .try_begin_scan()?
-        .set_folders(&[".pijul"])
-        .is_match();
-
-    if !is_repo {
-        return None;
-    }
-
     let mut module = context.new_module("pijul_channel");
     let config: PijulConfig = PijulConfig::try_load(module.config);
 
     // We default to disabled=true, so we have to check after loading our config module.
     if config.disabled {
         return None;
-    };
+    }
+
+    vcs::discover_repo_root(context, vcs::Vcs::Pijul)?;
 
     let channel_name = get_pijul_current_channel(context)?;
 
@@ -53,7 +46,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     module.set_segments(match parsed {
         Ok(segments) => segments,
         Err(error) => {
-            log::warn!("Error in module `pijul_channel`:\n{}", error);
+            log::warn!("Error in module `pijul_channel`:\n{error}");
             return None;
         }
     });
@@ -76,7 +69,7 @@ mod tests {
     use std::io;
     use std::path::Path;
 
-    use crate::test::{fixture_repo, FixtureProvider, ModuleRenderer};
+    use crate::test::{FixtureProvider, ModuleRenderer, fixture_repo};
 
     enum Expect<'a> {
         ChannelName(&'a str),

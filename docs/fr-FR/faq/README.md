@@ -16,7 +16,7 @@ L'aide à la complétion ou autocomplétion est fournie par le shell que vous av
 
 ## Est-ce que l'option globale `format` et `<module>.disabled` font la même chose ?
 
-Oui, ils peuvent tous deux être utilisés pour désactiver les modules dans l'invite de commande. Si tout ce que vous prévoyez de faire est de désactiver les modules, `<module>.disabled` est le meilleur moyen de le faire pour ces raisons :
+Oui, elles peuvent toutes deux être utilisées pour désactiver les modules dans l'invite de commande. Si tout ce que vous prévoyez de faire est de désactiver les modules, `<module>.disabled` est le meilleur moyen de le faire pour ces raisons :
 
 - Désactiver les modules est plus explicite que de les omettre du `format global`
 - Les modules nouvellement créés seront ajoutés à l'invite de commande au fur et à mesure que Starship sera mis à jour
@@ -38,7 +38,7 @@ NUM_JOBS=$(jobs -p | wc -l)
 PS1="$(starship prompt --status=$STATUS --jobs=$NUM_JOBS)"
 ```
 
-L' [implémentation Bash](https://github.com/starship/starship/blob/master/src/init/starship.bash) intégrée à Starship est légèrement plus complexe pour permettre des fonctionnalités avancées comme le [module de durée de commande](https://starship.rs/config/#command-duration) et pour s'assurer que Starship est compatible avec les configurations Bash pré-installées.
+L'[implémentation Bash](https://github.com/starship/starship/blob/master/src/init/starship.bash) intégrée à Starship est légèrement plus complexe pour permettre des fonctionnalités avancées comme le [module de durée de commande](https://starship.rs/config/#command-duration) et pour s'assurer que Starship est compatible avec les configurations Bash pré-installées.
 
 Pour une liste de tous les flags acceptés par `starship prompt`, utilisez la commande suivante :
 
@@ -58,7 +58,7 @@ curl -sS https://starship.rs/install.sh | sh -s -- --platform unknown-linux-musl
 
 ## Pourquoi je vois des avertissements `Executing command "..." timed out.`?
 
-Starship exécute différentes commandes pour obtenir les informations à afficher dans l'invite, par exemple la version d'un programme ou l'état actuel de git. Pour s’assurer que starship ne soit pas bloqué par l’exécution de ces commandes, nous mettons une limite de temps. Si une commande dépasse cette limite, starship va arrêter l’exécution de la commande et afficher l’avertissement ci-dessus, c’est un comportement attendu. Cette limite de temps est configurable en utilisant la [clé `command_timeout`](/config/#prompt) si vous souhaitez l’augmenter. Vous pouvez également suivre les étapes de débogage ci-dessous pour voir quelle commande est lente et voir si vous pouvez l’optimiser. Enfin, vous pouvez définir la variable `STARSHIP_LOG` à `error` pour masquer ces avertissements.
+Starship exécute différentes commandes pour obtenir les informations à afficher dans l'invite, par exemple la version d'un programme ou l'état actuel de git. Pour s’assurer que starship ne soit pas bloqué par l’exécution de ces commandes, nous mettons une limite de temps. Si une commande dépasse cette limite, starship va arrêter l’exécution de la commande et afficher l’avertissement ci-dessus, c’est un comportement attendu. Cette limite de temps est configurable en utilisant la [clé `command_timeout`](../config/#prompt) si vous souhaitez l’augmenter. Vous pouvez également suivre les étapes de débogage ci-dessous pour voir quelle commande est lente et voir si vous pouvez l’optimiser. Enfin, vous pouvez définir la variable `STARSHIP_LOG` à `error` pour masquer ces avertissements.
 
 ## Je vois des symboles que je ne comprends pas et auxquels je ne m'attendais pas, que signifient-t-ils ?
 
@@ -72,7 +72,7 @@ Vous pouvez activer les journaux de débogage en utilisant la variable d’envir
 env STARSHIP_LOG=trace starship module rust
 ```
 
-Si starship est lent, vous pouvez essayer d’utiliser la commande `timings` pour voir si un module ou une commande particulière est à blâmer.
+Si Starship est lent, vous pouvez utiliser la commande `timings` pour vérifier si un module ou une commande en particulier est à l'origine du ralentissement.
 
 ```sh
 env STARSHIP_LOG=trace starship timings
@@ -80,7 +80,7 @@ env STARSHIP_LOG=trace starship timings
 
 Cela affichera le journal de suivi et un détail de tous les modules qui ont soit pris plus d’1ms pour s’exécuter, soit affiché quelque chose.
 
-Finally if you find a bug you can use the `bug-report` command to create a GitHub issue.
+Enfin, si vous trouvez un bug, vous pouvez utiliser la commande `bug-report` pour créer un ticket sur GitHub.
 
 ```sh
 starship bug-report
@@ -120,3 +120,11 @@ Si Starship a été installé en utilisant le script d'installation, la commande
 # Trouver et supprimer le binaire starship
 sh -c 'rm "$(command -v 'starship')"'
 ```
+
+## Comment installer Starship sans `sudo` ?
+
+Le script d'installation (`https://starship.rs/install.sh`) essaye d'utiliser `sudo` seulement si le répertoire d'installation ciblé n'est pas disponible en écriture pour l'utilisateur actuel. Le répertoire d'installation par défaut correspond à la variable d'environnement `$BIN_DIR`, ou `/usr/local/bin` si `$BIN_DIR` n'est pas définie. Si vous avez défini à la place un répertoire d'installation accessible en écriture par votre utilisateur, vous devriez pouvoir installer Starship sans `sudo`. Par exemple, la commande `curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin` utilise l'option `-b` du script d'installation pour définir le répertoire d'installation vers `~/.local/bin`.
+
+Pour une installation non interactive de Starship, n'oubliez pas d'ajouter l'option `-y` pour passer l'étape de confirmation. Vérifiez le code source du script d'installation pour obtenir une liste de toutes les options d'installation supportées.
+
+Lorsque vous utilisez un gestionnaire de paquet, référez-vous à la documentation dudit gestionnaire pour l'installation avec ou sans `sudo`.

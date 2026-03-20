@@ -2,11 +2,7 @@
 
 A pesar de que Starship es una prompt versátil, a veces necesitas hacer más que editar `starhip.toml` para que haga ciertas cosas. Esta página detalla algunas de las técnicas de configuración más avanzadas en Starship.
 
-::: warning
-
-Las configuraciones de esta sección están sujetas a cambios en futuras versiones de Starship.
-
-:::
+> [!ADVERTENCIA] Las configuraciones de esta sección están sujetas a cambios en futuras versiones de Starship.
 
 ## Prompt Transitoria en PowerShell
 
@@ -78,6 +74,26 @@ function starship_transient_rprompt_func
 end
 starship init fish | source
 enable_transience
+```
+
+## TransientPrompt y TransientRightPrompt en Bash
+
+El marco estructura [Ble.sh](https://github.com/akinomyoga/ble.sh) en v0.4 o superior le permite reemplazar el mensaje impreso previamente con cadenas personalizadas. Esto es útil en los casos en que la información del prompt no es siempre necesaria. Para habilitar esto, coloque esto en `~/.bashrc` `bleopt prompt_ps1_transient=<value>`:
+
+El \<value\> aquí es una lista separada por dos puntos de `siempre`, `mismo-dir` y `recortar`. Cuando `prompt_ps1_final` está vacío y la opción `prompt_ps1_transient` tiene un \<value\> no vacío, el mensaje especificado por `PS1` se borra al salir de la línea de comando actual. Si \<value\> contiene un campo `trim`, solo se conserva la última línea de la multilínea `PS1` y las demás líneas se borran. De lo contrario, la línea de comando se volverá a dibujar como si se hubiera especificado `PS1=`. Cuando un campo `same-dir` está contenido en \<value\> y el directorio de trabajo actual es diferente del directorio final de la línea de comando anterior, esta opción `prompt_ps1_transient` se ignora.
+
+Realice los siguientes cambios en su `~/.blerc` (o en `~/.config/blesh/init.sh`) para personalizar lo que se muestra a la izquierda y a la derecha:
+
+- Para personalizar con qué se reemplaza el lado izquierdo de la entrada, configure la opción `prompt_ps1_final` de Ble.sh. Por ejemplo, para mostrar el módulo de `personaje` de Starship aquí, harías
+
+```bash
+bleopt prompt_ps1_final='$(starship module character)'
+```
+
+- Para personalizar con qué se reemplaza el lado derecho de la entrada, configure la opción `prompt_rps1_final` de Ble.sh. Por ejemplo, para mostrar la hora en la que se inició el último comando aquí, lo harías
+
+```bash
+bleopt prompt_rps1_final='$(starship module time)'
 ```
 
 ## Comandos pre-prompt y pre-ejecución personalizados en Cmd
@@ -203,9 +219,11 @@ Invoke-Expression (&starship init powershell)
 
 Algunos intérpretes de comandos soportan un prompt derecho que se renderiza en la misma línea que la entrada. Starship puede establecer el contenido del prompt derecho usando la opción `right_format`. Cualquier módulo que pueda ser usado en `format` también es soportado en `right_format`. La variable `$all` solo contendrá módulos no utilizados explícitamente en `format` o `right_format`.
 
-Nota: El prompt derecho es una sola línea siguiendo la ubicación de entrada. Para alinear los módulos arriba de la línea de entrada en un prompt multi-línea, vea el [módulo `fill`](/config/#fill).
+Nota: El prompt derecho es una sola línea siguiendo la ubicación de entrada. Para alinear los módulos arriba de la línea de entrada en un prompt multi-línea, vea el [módulo de `relleno`](../config/#fill).
 
-`right_format` está actualmente soportado para los siguientes intérpretes de comandos: elvish, fish, zsh, xonsh, cmd, nushell.
+`right_format` actualmente es compatible con los siguientes shells: elvish, fish, zsh, xonsh, cmd, nushell, bash.
+
+Nota: Se debe instalar el framework [Ble.sh](https://github.com/akinomyoga/ble.sh) v0.4 o superior para poder utilizar el indicador correcto en bash.
 
 ### Ejemplo
 
@@ -244,7 +262,7 @@ Nota: Los prompts de continuación solo están disponibles en los siguientes int
 ```toml
 # ~/.config/starship.toml
 
-# Un prompt de continuación que muestra dos flechas rellenas
+# Un mensaje de continuación que muestra dos flechas rellenas
 continuation_prompt = '▶▶ '
 ```
 
@@ -265,7 +283,7 @@ Las cadenas de estilo son una lista de palabras, separadas por espacios en blanc
 - `<color>`
 - `ninguno`
 
-donde `<color>` es un especificador de color (discutido a continuación). `fg:<color>` y `<color>` hacen actualmente lo mismo, aunque esto puede cambiar en el futuro. `inverted` cambia el fondo y los colores de primer plano. El orden de las palabras en la cadena no importa.
+donde `<color>` es un especificador de color (discutido a continuación). `fg:<color>` y `<color>` hacen actualmente lo mismo, aunque esto puede cambiar en el futuro. `<color>` también se puede configurar como `prev_fg` o `prev_bg`, que evalúa el color de primer plano o de fondo del elemento anterior respectivamente si está disponible o `none` en caso contrario. `inverted` cambia el fondo y los colores de primer plano. El orden de las palabras en la cadena no importa.
 
 El token `none` anula todos los demás tokens en una cadena si no es parte de un especificador `bg:`, de modo que por ejemplo `fg:red none fg:blue` creará una cadena sin ningún estilo. `bg:none` establece el fondo al color por defecto, así que `fg:red bg:none` es equivalente a `red` o `fg:red` y `bg:green fg:red bg:none` también es equivalente a `fg:red` o `red`. Puede convertirse en un error usar `none` junto con otros estilos en el futuro.
 
@@ -279,6 +297,6 @@ Si se especifican varios colores para el primer plano/fondo, el último en la ca
 
 No todas las cadenas de estilo se mostrarán correctamente en cada terminal. En particular, existen las siguientes rarezas conocidas:
 
-- Muchos terminales deshabilitan el soporte para `parpadear` por defecto
+- Muchos terminales deshabilitan el soporte para `parpadear` por defecto.
 - `hiden` no es [compatible con iTerm](https://gitlab.com/gnachman/iterm2/-/issues/4564).
-- `strikethrough` no está soportado por macOS Terminal.app por defecto
+- `strikethrough` no está soportado por macOS Terminal.app por defecto.

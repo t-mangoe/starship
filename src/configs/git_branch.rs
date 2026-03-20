@@ -16,20 +16,22 @@ pub struct GitBranchConfig<'a> {
     pub only_attached: bool,
     pub always_show_remote: bool,
     pub ignore_branches: Vec<&'a str>,
+    pub ignore_bare_repo: bool,
     pub disabled: bool,
 }
 
-impl<'a> Default for GitBranchConfig<'a> {
+impl Default for GitBranchConfig<'_> {
     fn default() -> Self {
-        GitBranchConfig {
+        Self {
             format: "on [$symbol$branch(:$remote_branch)]($style) ",
             symbol: " ",
             style: "bold purple",
-            truncation_length: std::i64::MAX,
+            truncation_length: i64::MAX,
             truncation_symbol: "…",
             only_attached: false,
             always_show_remote: false,
             ignore_branches: vec![],
+            ignore_bare_repo: false,
             disabled: false,
         }
     }

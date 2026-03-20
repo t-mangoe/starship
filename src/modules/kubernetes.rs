@@ -1,8 +1,8 @@
-use yaml_rust::YamlLoader;
+use serde_json::Value as JsonValue;
+use yaml_rust2::{Yaml, YamlLoader};
 
 use std::borrow::Cow;
 use std::env;
-use std::path;
 
 use super::{Context, Module, ModuleConfig};
 
@@ -17,50 +17,39 @@ struct KubeCtxComponents {
     cluster: Option<String>,
 }
 
-fn get_current_kube_context_name(filename: path::PathBuf) -> Option<String> {
-    let contents = utils::read_file(filename).ok()?;
-
-    let yaml_docs = YamlLoader::load_from_str(&contents).ok()?;
-    let conf = yaml_docs.get(0)?;
-    conf["current-context"]
-        .as_str()
+fn get_current_kube_context_name<T: DataValue>(document: &T) -> Option<&str> {
+    document
+        .get("current-context")
+        .and_then(DataValue::as_str)
         .filter(|s| !s.is_empty())
-        .map(String::from)
 }
 
-fn get_kube_ctx_components(
-    filename: path::PathBuf,
+fn get_kube_ctx_components<T: DataValue>(
+    document: &T,
     current_ctx_name: &str,
 ) -> Option<KubeCtxComponents> {
-    let contents = utils::read_file(filename).ok()?;
-
-    let yaml_docs = YamlLoader::load_from_str(&contents).ok()?;
-    let conf = yaml_docs.get(0)?;
-    let contexts = conf["contexts"].as_vec()?;
-
-    // Find the context with the name we're looking for
-    // or return None if we can't find it
-    let (ctx_yaml, _) = contexts
+    document
+        .get("contexts")?
+        .as_array()?
         .iter()
-        .filter_map(|ctx| Some((ctx, ctx["name"].as_str()?)))
-        .find(|(_, name)| name == &current_ctx_name)?;
-
-    let ctx_components = KubeCtxComponents {
-        user: ctx_yaml["context"]["user"]
-            .as_str()
-            .filter(|s| !s.is_empty())
-            .map(String::from),
-        namespace: ctx_yaml["context"]["namespace"]
-            .as_str()
-            .filter(|s| !s.is_empty())
-            .map(String::from),
-        cluster: ctx_yaml["context"]["cluster"]
-            .as_str()
-            .filter(|s| !s.is_empty())
-            .map(String::from),
-    };
-
-    Some(ctx_components)
+        .find(|ctx| ctx.get("name").and_then(DataValue::as_str) == Some(current_ctx_name))
+        .map(|ctx| KubeCtxComponents {
+            user: ctx
+                .get("context")
+                .and_then(|v| v.get("user"))
+                .and_then(DataValue::as_str)
+                .map(String::from),
+            namespace: ctx
+                .get("context")
+                .and_then(|v| v.get("namespace"))
+                .and_then(DataValue::as_str)
+                .map(String::from),
+            cluster: ctx
+                .get("context")
+                .and_then(|v| v.get("cluster"))
+                .and_then(DataValue::as_str)
+                .map(String::from),
+        })
 }
 
 fn get_aliased_name<'a>(
@@ -93,7 +82,53 @@ fn get_aliased_name<'a>(
     match replaced {
         Cow::Owned(replaced) => Some(replaced),
         // It didn't match...
-        _ => None,
+        Cow::Borrowed(_) => None,
+    }
+}
+
+#[derive(Debug)]
+enum Document {
+    Json(JsonValue),
+    Yaml(Yaml),
+}
+
+trait DataValue {
+    fn get(&self, key: &str) -> Option<&Self>;
+    fn as_str(&self) -> Option<&str>;
+    fn as_array(&self) -> Option<Vec<&Self>>;
+}
+
+impl DataValue for JsonValue {
+    fn get(&self, key: &str) -> Option<&Self> {
+        self.get(key)
+    }
+
+    fn as_str(&self) -> Option<&str> {
+        self.as_str()
+    }
+
+    fn as_array(&self) -> Option<Vec<&Self>> {
+        self.as_array().map(|arr| arr.iter().collect())
+    }
+}
+
+impl DataValue for Yaml {
+    fn get(&self, key: &str) -> Option<&Self> {
+        match self {
+            Self::Hash(map) => map.get(&Self::String(key.to_string())),
+            _ => None,
+        }
+    }
+
+    fn as_str(&self) -> Option<&str> {
+        self.as_str()
+    }
+
+    fn as_array(&self) -> Option<Vec<&Self>> {
+        match self {
+            Self::Array(arr) => Some(arr.iter().collect()),
+            _ => None,
+        }
     }
 }
 
@@ -105,7 +140,10 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     // before it was only checking against whatever is in the config starship.toml
     if config.disabled {
         return None;
-    };
+    }
+
+    let have_env_config = !config.detect_env_vars.is_empty();
+    let have_env_vars = have_env_config.then(|| context.detect_env_vars(&config.detect_env_vars));
 
     // If we have some config for doing the directory scan then we use it but if we don't then we
     // assume we should treat it like the module is enabled to preserve backward compatibility.
@@ -118,19 +156,16 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     .any(|v| !v.is_empty());
 
     let is_kube_project = have_scan_config.then(|| {
-        context
-            .try_begin_scan()
-            .map(|scanner| {
-                scanner
-                    .set_files(&config.detect_files)
-                    .set_folders(&config.detect_folders)
-                    .set_extensions(&config.detect_extensions)
-                    .is_match()
-            })
-            .unwrap_or(false)
+        context.try_begin_scan().is_some_and(|scanner| {
+            scanner
+                .set_files(&config.detect_files)
+                .set_folders(&config.detect_folders)
+                .set_extensions(&config.detect_extensions)
+                .is_match()
+        })
     });
 
-    if !is_kube_project.unwrap_or(true) {
+    if !is_kube_project.or(have_env_vars).unwrap_or(true) {
         return None;
     }
 
@@ -140,8 +175,13 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
         .get_env("KUBECONFIG")
         .unwrap_or(default_config_file.to_str()?.to_string());
 
-    let current_kube_ctx_name =
-        env::split_paths(&kube_cfg).find_map(get_current_kube_context_name)?;
+    let raw_kubeconfigs = env::split_paths(&kube_cfg).map(|file| utils::read_file(file).ok());
+    let kubeconfigs = parse_kubeconfigs(raw_kubeconfigs);
+
+    let current_kube_ctx_name = kubeconfigs.iter().find_map(|v| match v {
+        Document::Json(json) => get_current_kube_context_name(json),
+        Document::Yaml(yaml) => get_current_kube_context_name(yaml),
+    })?;
 
     // Even if we have multiple config files, the first key wins
     // https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/
@@ -149,9 +189,10 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     // > use only values from the first file's red-user. Even if the second file has
     // > non-conflicting entries under red-user, discard them.
     // for that reason, we can pick the first context with that name
-    let ctx_components: KubeCtxComponents = env::split_paths(&kube_cfg)
-        .find_map(|filename| get_kube_ctx_components(filename, &current_kube_ctx_name))
-        .unwrap_or_else(|| {
+    let ctx_components: KubeCtxComponents = kubeconfigs.iter().find_map(|kubeconfig|  match kubeconfig {
+        Document::Json(json) => get_kube_ctx_components(json, current_kube_ctx_name),
+        Document::Yaml(yaml) => get_kube_ctx_components(yaml, current_kube_ctx_name),
+    }).unwrap_or_else(|| {
             // TODO: figure out if returning is more sensible. But currently we have tests depending on this
             log::warn!(
                 "Invalid KUBECONFIG: identified current-context `{}`, but couldn't find the context in any config file(s): `{}`.\n",
@@ -169,7 +210,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
         .find_map(|context_config| {
             let context_alias = get_aliased_name(
                 Some(context_config.context_pattern),
-                Some(&current_kube_ctx_name),
+                Some(current_kube_ctx_name),
                 context_config.context_alias,
             )?;
 
@@ -185,7 +226,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
 
             Some((Some(context_config), context_alias, user_alias))
         })
-        .unwrap_or_else(|| (None, current_kube_ctx_name.clone(), ctx_components.user));
+        .unwrap_or_else(|| (None, current_kube_ctx_name.to_string(), ctx_components.user));
 
     // TODO: remove deprecated aliases after starship 2.0
     let display_context =
@@ -231,12 +272,38 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     module.set_segments(match parsed {
         Ok(segments) => segments,
         Err(error) => {
-            log::warn!("Error in module `kubernetes`: \n{}", error);
+            log::warn!("Error in module `kubernetes`: \n{error}");
             return None;
         }
     });
 
     Some(module)
+}
+
+fn parse_kubeconfigs<I>(raw_kubeconfigs: I) -> Vec<Document>
+where
+    I: Iterator<Item = Option<String>>,
+{
+    raw_kubeconfigs
+        .filter_map(|content| match content {
+            Some(value) => match value.chars().next() {
+                // Parsing as json is about an order of magnitude faster than parsing
+                // as yaml, so do that if possible.
+                Some('{') => match serde_json::from_str(&value) {
+                    Ok(json) => Some(Document::Json(json)),
+                    Err(_) => parse_yaml(&value),
+                },
+                _ => parse_yaml(&value),
+            },
+            _ => None,
+        })
+        .collect()
+}
+
+fn parse_yaml(s: &str) -> Option<Document> {
+    YamlLoader::load_from_str(s)
+        .ok()
+        .and_then(|yaml| yaml.into_iter().next().map(Document::Yaml))
 }
 
 mod deprecated {
@@ -259,7 +326,7 @@ mod deprecated {
                 match replaced {
                     // We have a match if the replaced string is different from the original
                     Cow::Owned(replaced) => Some(replaced),
-                    _ => None,
+                    Cow::Borrowed(_) => None,
                 }
             })
         };
@@ -267,12 +334,12 @@ mod deprecated {
         match alias {
             Some(alias) => {
                 log::warn!(
-                        "Usage of '{}_aliases' is deprecated and will be removed in 2.0; Use 'contexts' with '{}_alias' instead. (`{}` -> `{}`)",
-                        &name,
-                        &name,
-                        &current_value,
-                        &alias
-                    );
+                    "Usage of '{}_aliases' is deprecated and will be removed in 2.0; Use 'contexts' with '{}_alias' instead. (`{}` -> `{}`)",
+                    &name,
+                    &name,
+                    &current_value,
+                    &alias
+                );
                 Some(alias)
             }
             None => Some(current_value),
@@ -282,10 +349,12 @@ mod deprecated {
 
 #[cfg(test)]
 mod tests {
+    use crate::modules::kubernetes::Document;
+    use crate::modules::kubernetes::parse_kubeconfigs;
     use crate::test::ModuleRenderer;
     use nu_ansi_term::Color;
     use std::env;
-    use std::fs::{create_dir, File};
+    use std::fs::{File, create_dir};
     use std::io::{self, Write};
 
     #[test]
@@ -323,7 +392,7 @@ users: []
     }
 
     #[test]
-    fn test_none_when_no_detected_files_or_folders() -> io::Result<()> {
+    fn test_none_when_no_detected_files_folders_or_env_vars() -> io::Result<()> {
         let dir = tempfile::tempdir()?;
 
         let filename = dir.path().join("config");
@@ -355,6 +424,7 @@ users: []
                 detect_files = ["k8s.ext"]
                 detect_extensions = ["k8s"]
                 detect_folders = ["k8s_folder"]
+                detect_env_vars = ["k8s_env_var"]
             })
             .collect();
 
@@ -364,7 +434,7 @@ users: []
     }
 
     #[test]
-    fn test_with_detected_files_and_folder() -> io::Result<()> {
+    fn test_with_detected_files_folder_and_env_vars() -> io::Result<()> {
         let dir = tempfile::tempdir()?;
 
         let filename = dir.path().join("config");
@@ -432,6 +502,29 @@ users: []
             })
             .collect();
 
+        let empty_dir = tempfile::tempdir()?;
+
+        let actual_env_var = ModuleRenderer::new("kubernetes")
+            .path(empty_dir.path())
+            .env("KUBECONFIG", filename.to_string_lossy().as_ref())
+            .env("TEST_K8S_ENV", "foo")
+            .config(toml::toml! {
+                [kubernetes]
+                disabled = false
+                detect_env_vars = ["TEST_K8S_ENV"]
+            })
+            .collect();
+
+        let actual_none = ModuleRenderer::new("kubernetes")
+            .path(empty_dir.path())
+            .env("KUBECONFIG", filename.to_string_lossy().as_ref())
+            .config(toml::toml! {
+                [kubernetes]
+                disabled = false
+                detect_files = ["k8s.ext"]
+            })
+            .collect();
+
         let expected = Some(format!(
             "{} in ",
             Color::Cyan.bold().paint("☸ test_context")
@@ -440,6 +533,8 @@ users: []
         assert_eq!(expected, actual_file);
         assert_eq!(expected, actual_ext);
         assert_eq!(expected, actual_dir);
+        assert_eq!(expected, actual_env_var);
+        assert_eq!(None, actual_none);
 
         dir.close()
     }
@@ -1442,6 +1537,105 @@ users: []
             "{} in ",
             Color::Red.bold().paint("☸ test_context (test_namespace)")
         ));
+        assert_eq!(expected, actual);
+        dir.close()
+    }
+
+    #[test]
+    fn test_json_kubeconfig_is_parsed_as_json() {
+        let json_kubeconfig = r#"{
+  "apiVersion": "v1",
+  "clusters": [],
+  "contexts": [
+    {
+      "context": {
+        "user": "test_user",
+        "namespace": "test_namespace"
+      },
+      "name": "test_context"
+    }
+  ],
+  "current-context": "test_context",
+  "kind": "Config",
+  "preferences": {},
+  "users": []
+}"#
+        .to_string();
+
+        let kubeconfigs = [Some(json_kubeconfig)];
+        let results = parse_kubeconfigs(kubeconfigs.iter().cloned());
+        let actual = results.first().unwrap();
+        match actual {
+            Document::Json(..) => {}
+            _ => panic!("Expected Document::Json, got {actual:?}"),
+        }
+    }
+
+    #[test]
+    fn fallback_to_yaml_parsing() {
+        let json_kubeconfig = r#"{
+  "apiVersion": v1,
+  "clusters": [],
+  "contexts": [
+    {
+      "context": {
+        "user": test_user,
+        "namespace": test_namespace
+      },
+      "name": test_context
+    }
+  ],
+  "current-context": test_context,
+  "kind": Config,
+  "preferences": {},
+  "users": []
+}"#
+        .to_string();
+
+        let kubeconfigs = [Some(json_kubeconfig)];
+        let results = parse_kubeconfigs(kubeconfigs.iter().cloned());
+        let actual = results.first().unwrap();
+        match actual {
+            Document::Yaml(..) => {}
+            Document::Json(_) => panic!("Expected Document::Yaml, got {actual:?}"),
+        }
+    }
+
+    #[test]
+    fn test_parse_json_kubeconfig() -> std::io::Result<()> {
+        let dir = tempfile::tempdir()?;
+        let filename = dir.path().join("config");
+        let mut file = File::create(&filename)?;
+        file.write_all(
+            br#"{
+  "contexts": [
+    {
+      "name": "test_context",
+      "context": {
+        "user": "test_user",
+        "namespace": "test_namespace"
+      }
+    }
+  ],
+  "current-context": "test_context",
+  "kind": "Config",
+  "apiVersion": "v1"
+}
+"#,
+        )?;
+        file.sync_all()?;
+
+        let actual = ModuleRenderer::new("kubernetes")
+            .path(dir.path())
+            .env("KUBECONFIG", filename.to_string_lossy().as_ref())
+            .config(toml::toml! {
+                [kubernetes]
+                disabled = false
+                format = "($user )($context )($cluster )($namespace)"
+            })
+            .collect();
+
+        let expected = Some("test_user test_context test_namespace".to_string());
         assert_eq!(expected, actual);
         dir.close()
     }

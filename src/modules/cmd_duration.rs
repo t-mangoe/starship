@@ -43,7 +43,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     module.set_segments(match parsed {
         Ok(segments) => segments,
         Err(error) => {
-            log::warn!("Error in module `cmd_duration`: \n{}", error);
+            log::warn!("Error in module `cmd_duration`: \n{error}");
             return None;
         }
     });
@@ -69,7 +69,7 @@ fn undistract_me<'a>(
     elapsed: u128,
 ) -> Module<'a> {
     use notify_rust::{Notification, Timeout};
-    use nu_ansi_term::{unstyle, AnsiStrings};
+    use nu_ansi_term::{AnsiStrings, unstyle};
 
     if config.show_notifications && config.min_time_to_notify as u128 <= elapsed {
         if cfg!(target_os = "linux") {
@@ -82,6 +82,11 @@ fn undistract_me<'a>(
                 return module;
             };
         }
+
+        // On macOS 26+ notify-rust will get stuck finding the current application identifier
+        // so we set it manually to the default terminal app.
+        #[cfg(target_os = "macos")]
+        let _ = notify_rust::set_application("com.apple.Terminal");
 
         let body = format!(
             "Command execution {}",
@@ -101,7 +106,7 @@ fn undistract_me<'a>(
             .timeout(timeout);
 
         if let Err(err) = notification.show() {
-            log::trace!("Cannot show notification: {}", err);
+            log::trace!("Cannot show notification: {err}");
         }
     }
 

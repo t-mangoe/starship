@@ -1,4 +1,3 @@
-use nu_ansi_term::Style;
 use pest::error::Error as PestError;
 use rayon::prelude::*;
 use std::borrow::Cow;
@@ -6,12 +5,12 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::error::Error;
 use std::fmt;
 
-use crate::config::parse_style_string;
+use crate::config::{Style, parse_style_string};
 use crate::context::{Context, Shell};
 use crate::segment::Segment;
 
 use super::model::*;
-use super::parser::{parse, Rule};
+use super::parser::{Rule, parse};
 
 #[derive(Clone)]
 enum VariableValue<'a> {
@@ -21,9 +20,9 @@ enum VariableValue<'a> {
     Meta(Vec<FormatElement<'a>>),
 }
 
-impl<'a> Default for VariableValue<'a> {
+impl Default for VariableValue<'_> {
     fn default() -> Self {
-        VariableValue::Plain(Cow::Borrowed(""))
+        Self::Plain(Cow::Borrowed(""))
     }
 }
 
@@ -103,11 +102,11 @@ impl<'a> StringFormatter<'a> {
     /// parameter and returns the one of the following values:
     ///
     /// - `None`: This variable will be reserved for further mappers. If it is `None` when
-    /// `self.parse()` is called, it will be dropped.
+    ///   `self.parse()` is called, it will be dropped.
     ///
     /// - `Some(Err(StringFormatterError))`: This variable will throws `StringFormatterError` when
-    /// `self.parse()` is called. Return this if some fatal error occurred and the format string
-    /// should not be rendered.
+    ///   `self.parse()` is called. Return this if some fatal error occurred and the format string
+    ///   should not be rendered.
     ///
     /// - `Some(Ok(_))`: The value of this variable will be displayed in the format string.
     ///
@@ -223,7 +222,7 @@ impl<'a> StringFormatter<'a> {
             .par_iter_mut()
             .filter(|(_, value)| value.is_none())
             .for_each(|(key, value)| {
-                *value = mapper(key).map(|var| var.map(std::convert::Into::into));
+                *value = mapper(key).map(|var| var.map(Into::into));
             });
         self
     }
@@ -245,14 +244,13 @@ impl<'a> StringFormatter<'a> {
             style_variables: &'a StyleVariableMapType<'a>,
             context: Option<&Context>,
         ) -> Result<Vec<Segment>, StringFormatterError> {
-            let style = parse_style(textgroup.style, style_variables, context);
-            parse_format(
-                textgroup.format,
-                style.transpose()?,
-                variables,
-                style_variables,
-                context,
-            )
+            let style = parse_style(textgroup.style, style_variables, context).transpose()?;
+
+            // Empty textgroups still produce a segment to preserve style for prev_fg/prev_bg references
+            if textgroup.format.is_empty() {
+                return Ok(Segment::from_text(style, ""));
+            }
+            parse_format(textgroup.format, style, variables, style_variables, context)
         }
 
         fn parse_style<'a>(
@@ -304,10 +302,6 @@ impl<'a> StringFormatter<'a> {
                             ),
                         )),
                         FormatElement::TextGroup(textgroup) => {
-                            let textgroup = TextGroup {
-                                format: textgroup.format,
-                                style: textgroup.style,
-                            };
                             parse_textgroup(textgroup, variables, style_variables, context)
                         }
                         FormatElement::Variable(name) => variables
@@ -357,13 +351,13 @@ impl<'a> StringFormatter<'a> {
                                     variables
                                         .get(var.as_ref())
                                         // false if can't find the variable in format string
-                                        .map_or(false, |map_result| {
+                                        .is_some_and(|map_result| {
                                             let map_result = map_result.as_ref();
                                             map_result
                                                 .and_then(|result| result.as_ref().ok())
                                                 // false if the variable is None or Err, or a meta variable
                                                 // that shouldn't show
-                                                .map_or(false, |result| match result {
+                                                .is_some_and(|result| match result {
                                                     // If the variable is a meta variable, also
                                                     // check the format string inside it.
                                                     VariableValue::Meta(meta_elements) => {
@@ -412,13 +406,13 @@ impl<'a> StringFormatter<'a> {
     }
 }
 
-impl<'a> VariableHolder<String> for StringFormatter<'a> {
+impl VariableHolder<String> for StringFormatter<'_> {
     fn get_variables(&self) -> BTreeSet<String> {
         self.variables.keys().cloned().collect()
     }
 }
 
-impl<'a> StyleVariableHolder<String> for StringFormatter<'a> {
+impl StyleVariableHolder<String> for StringFormatter<'_> {
     fn get_style_variables(&self) -> BTreeSet<String> {
         self.style_variables.keys().cloned().collect()
     }
@@ -487,7 +481,7 @@ mod tests {
         let style = Some(Color::Red.bold());
 
         let formatter = StringFormatter::new(FORMAT_STR).unwrap().map(empty_mapper);
-        let result = formatter.parse(style, None).unwrap();
+        let result = formatter.parse(style.map(Into::into), None).unwrap();
         let mut result_iter = result.iter();
         match_next!(result_iter, "text", style);
     }
@@ -562,7 +556,7 @@ mod tests {
         let inner_style = Some(Color::Blue.normal());
 
         let formatter = StringFormatter::new(FORMAT_STR).unwrap().map(empty_mapper);
-        let result = formatter.parse(outer_style, None).unwrap();
+        let result = formatter.parse(outer_style.map(Into::into), None).unwrap();
         let mut result_iter = result.iter();
         match_next!(result_iter, "outer ", outer_style);
         match_next!(result_iter, "middle ", middle_style);
@@ -617,10 +611,10 @@ mod tests {
         let styled_no_modifier_style = Some(Color::Green.normal());
 
         let mut segments: Vec<Segment> = Vec::new();
-        segments.extend(Segment::from_text(None, "styless"));
-        segments.extend(Segment::from_text(styled_style, "styled"));
+        segments.extend(Segment::from_text(None, "styleless"));
+        segments.extend(Segment::from_text(styled_style.map(Into::into), "styled"));
         segments.extend(Segment::from_text(
-            styled_no_modifier_style,
+            styled_no_modifier_style.map(Into::into),
             "styled_no_modifier",
         ));
 
@@ -632,7 +626,7 @@ mod tests {
             });
         let result = formatter.parse(None, None).unwrap();
         let mut result_iter = result.iter();
-        match_next!(result_iter, "styless", var_style);
+        match_next!(result_iter, "styleless", var_style);
         match_next!(result_iter, "styled", styled_style);
         match_next!(result_iter, "styled_no_modifier", styled_no_modifier_style);
     }
@@ -725,6 +719,50 @@ mod tests {
             });
         let result = formatter.parse(None, None).unwrap();
         assert_eq!(result.len(), 0);
+    }
+
+    #[test]
+    fn test_empty_textgroup_with_style() {
+        const FORMAT_STR: &str = "[](bg:#9A348E)";
+
+        let formatter = StringFormatter::new(FORMAT_STR).unwrap();
+        let result = formatter.parse(None, None).unwrap();
+
+        assert_eq!(result.len(), 1);
+        assert!(result[0].value().is_empty());
+        assert!(result[0].style().is_some());
+    }
+
+    #[test]
+    fn test_empty_textgroup_without_style() {
+        const FORMAT_STR: &str = "[]()";
+
+        let formatter = StringFormatter::new(FORMAT_STR).unwrap();
+        let result = formatter.parse(None, None).unwrap();
+
+        assert_eq!(result.len(), 1);
+        assert!(result[0].value().is_empty());
+    }
+
+    #[test]
+    fn test_empty_textgroup_propagates_prev_bg() {
+        const FORMAT_STR: &str = "[](bg:#9A348E)[X](bg:prev_bg)";
+
+        let formatter = StringFormatter::new(FORMAT_STR).unwrap();
+        let result = formatter.parse(None, None).unwrap();
+
+        assert_eq!(result.len(), 2);
+
+        // First segment: empty with bg:#9A348E
+        let first_ansi = result[0].ansi_string(None);
+        let prev_style = first_ansi.style_ref();
+
+        // Second segment: should inherit bg from first
+        let second_ansi = result[1].ansi_string(Some(prev_style));
+        assert_eq!(
+            second_ansi.style_ref().background,
+            Some(nu_ansi_term::Color::Rgb(154, 52, 142))
+        );
     }
 
     #[test]

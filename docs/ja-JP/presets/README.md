@@ -12,19 +12,15 @@
 
 ## [No Nerd Fonts](./no-nerd-font.md)
 
-This preset changes the symbols for several modules so that no Nerd Font symbols are used anywhere in the prompt.
+このプリセットは一部のモジュールで使われるシンボルを変更して、Nerd Font シンボルをどこにも使わないようにします。
 
-::: tip
+> [!TIP] This preset will become the default preset [in a future release of starship](https://github.com/starship/starship/pull/3544).
 
-This preset will become the default preset [in a future release of starship](https://github.com/starship/starship/pull/3544).
-
-:::
-
-[Click to view No Nerd Font preset](./no-nerd-font)
+[No Nerd Font プリセットを表示するにはクリックしてください。](./no-nerd-font)
 
 ## [Bracketed Segments](./bracketed-segments.md)
 
-このプリセットは付属のモジュール全てのフォーマットを変更し、デフォルトのStarshipの表示("via", "on", etc.)から、それぞれの情報を括弧で区分けするように変更します。
+このプリセットは付属のモジュール全てのフォーマットを変更し、デフォルトのStarshipの表示("via", "on", etc.) から、それぞれの情報を括弧で区分けするように変更します。
 
 [![Bracketed Segmentsプリセットのスクリーンショット](/presets/img/bracketed-segments.png "Bracketed Segmentsプリセットを表示するにはクリックしてください")](./bracketed-segments)
 
@@ -42,7 +38,7 @@ This preset will become the default preset [in a future release of starship](htt
 
 ## [No Empty Icons](./no-empty-icons.md)
 
-This preset does not show icons if the toolset is not found.
+ツールセットが見つからない場合、このプリセットはアイコンを表示しません。
 
 [![Empty Icons プリセットのスクリーンショット](/presets/img/no-empty-icons.png "No Runtime Versionsプリセットを表示するにはクリックしてください")](./no-empty-icons.md)
 
@@ -62,4 +58,22 @@ This preset does not show icons if the toolset is not found.
 
 このプリセットは[tokyo-night-vscode-theme](https://github.com/enkia/tokyo-night-vscode-theme)を参考にしています。
 
-[![Tokyo Night プリセットのスクリーンショット](/presets/img/tokyo-night.png "Click to view Tokyo Night preset")](./tokyo-night)
+[![Tokyo Night プリセットのスクリーンショット](/presets/img/tokyo-night.png "Tokyo Night プリセットを表示するにはクリックしてください")](./tokyo-night)
+
+## [Gruvbox Rainbow](./gruvbox-rainbow.md)
+
+このプリセットは [Pastel Powerline](./pastel-powerline.md) と [Tokyo Night](./tokyo-night.md) に強くインスパイアされています。
+
+[![Gruvbox Rainbow プリセットのスクリーンショット](/presets/img/gruvbox-rainbow.png "Gruvbox Rainbow プリセットを表示するにはクリックしてください")](./gruvbox-rainbow)
+
+## [Jetpack](./jetpack.md)
+
+[geometry](https://github.com/geometry-zsh/geometry) と [spaceship](https://github.com/spaceship-prompt/spaceship-prompt) のプロンプトにインスパイアされた擬似ミニマリストプリセットです。
+
+[![Jetpack プリセットのスクリーンショット](/presets/img/jetpack.png "Jetpack プリセットを表示するにはクリックしてください")](./jetpack)
+
+## [Catppuccin Powerline](./catppuccin-powerline.md)
+
+This preset is a minimally modified version of [Gruvbox Rainbow](./gruvbox-rainbow.md) using the [Catppuccin](https://github.com/catppuccin/catppuccin) theme palette.
+
+[![Screenshot of Catppuccin Powerline preset](/presets/img/catppuccin-powerline.png "Click to view Catppuccin Powerline preset")](./catppuccin-powerline)

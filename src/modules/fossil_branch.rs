@@ -1,4 +1,4 @@
-use super::{Context, Module, ModuleConfig};
+use super::{Context, Module, ModuleConfig, vcs};
 
 use crate::configs::fossil_branch::FossilBranchConfig;
 use crate::formatter::StringFormatter;
@@ -15,25 +15,16 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     // before it was only checking against whatever is in the config starship.toml
     if config.disabled {
         return None;
-    };
+    }
 
-    let checkout_db = if cfg!(windows) {
-        "_FOSSIL_"
-    } else {
-        ".fslckout"
-    };
-    // See if we're in a check-out by scanning upwards for a directory containing the checkout_db file
-    context
-        .begin_ancestor_scan()
-        .set_files(&[checkout_db])
-        .scan()?;
+    vcs::discover_repo_root(context, vcs::Vcs::Fossil)?;
 
     let len = if config.truncation_length <= 0 {
         log::warn!(
             "\"truncation_length\" should be a positive value, found {}",
             config.truncation_length
         );
-        std::usize::MAX
+        usize::MAX
     } else {
         config.truncation_length as usize
     };
@@ -63,7 +54,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     module.set_segments(match parsed {
         Ok(segments) => segments,
         Err(error) => {
-            log::warn!("Error in module `fossil_branch`:\n{}", error);
+            log::warn!("Error in module `fossil_branch`:\n{error}");
             return None;
         }
     });
@@ -78,7 +69,7 @@ mod tests {
 
     use nu_ansi_term::{Color, Style};
 
-    use crate::test::{fixture_repo, FixtureProvider, ModuleRenderer};
+    use crate::test::{FixtureProvider, ModuleRenderer, fixture_repo};
 
     enum Expect<'a> {
         BranchName(&'a str),
@@ -205,7 +196,7 @@ mod tests {
                 }
                 Expect::Symbol(symbol) => expect_symbol = symbol,
                 Expect::TruncationSymbol(truncation_symbol) => {
-                    expect_truncation_symbol = truncation_symbol
+                    expect_truncation_symbol = truncation_symbol;
                 }
                 Expect::NoTruncation => expect_truncation_symbol = "",
                 Expect::BranchName(branch_name) => expect_branch_name = branch_name,

@@ -10,7 +10,7 @@ use crate::context::Context;
 use crate::utils;
 use std::fs::File;
 use std::io::Write;
-use toml_edit::Document;
+use toml_edit::DocumentMut;
 
 #[cfg(not(windows))]
 const STD_EDITOR: &str = "vi";
@@ -29,7 +29,11 @@ pub fn update_configuration(context: &Context, name: &str, value: &str) {
     }
 }
 
-fn handle_update_configuration(doc: &mut Document, name: &str, value: &str) -> Result<(), String> {
+fn handle_update_configuration(
+    doc: &mut DocumentMut,
+    name: &str,
+    value: &str,
+) -> Result<(), String> {
     let mut keys = name.split('.');
 
     let first_key = keys.next().unwrap_or_default();
@@ -190,7 +194,7 @@ pub fn toggle_configuration(context: &Context, name: &str, key: &str) {
     }
 }
 
-fn handle_toggle_configuration(doc: &mut Document, name: &str, key: &str) -> Result<(), String> {
+fn handle_toggle_configuration(doc: &mut DocumentMut, name: &str, key: &str) -> Result<(), String> {
     if name.is_empty() || key.is_empty() {
         return Err("Empty table keys are not supported".to_owned());
     }
@@ -220,22 +224,22 @@ fn handle_toggle_configuration(doc: &mut Document, name: &str, key: &str) -> Res
 }
 
 pub fn get_configuration(context: &Context) -> toml::Table {
-    let starship_config = StarshipConfig::initialize(&context.get_config_path_os());
+    let starship_config = StarshipConfig::initialize(context.get_config_path_os().as_deref());
 
     starship_config.config.unwrap_or_default()
 }
 
-pub fn get_configuration_edit(context: &Context) -> Document {
+pub fn get_configuration_edit(context: &Context) -> DocumentMut {
     let config_file_path = context.get_config_path_os();
-    let toml_content = StarshipConfig::read_config_content_as_str(&config_file_path);
+    let toml_content = StarshipConfig::read_config_content_as_str(config_file_path.as_deref());
 
     toml_content
         .unwrap_or_default()
-        .parse::<Document>()
+        .parse::<DocumentMut>()
         .expect("Failed to load starship config")
 }
 
-pub fn write_configuration(context: &Context, doc: &Document) {
+pub fn write_configuration(context: &Context, doc: &DocumentMut) {
     let config_path = context.get_config_path_os().unwrap_or_else(|| {
         eprintln!("config path required to write configuration");
         process::exit(1);
@@ -309,13 +313,13 @@ fn get_editor_internal(visual: Option<String>, editor: Option<String>) -> String
 
 #[cfg(test)]
 mod tests {
-    use std::{fs::create_dir, io};
+    use std::{fs::create_dir, io, path::PathBuf};
 
     use tempfile::TempDir;
     use toml_edit::Item;
 
     use crate::{
-        context::{Shell, Target},
+        context::{Properties, Shell, Target},
         context_env::Env,
     };
 
@@ -372,13 +376,13 @@ mod tests {
 
     #[test]
     fn no_panic_when_editor_unparsable() {
-        let outcome = edit_configuration(&Default::default(), Some("\"vim"));
+        let outcome = edit_configuration(&Context::default(), Some("\"vim"));
         assert!(outcome.is_err());
     }
 
     #[test]
     fn no_panic_when_editor_not_found() {
-        let outcome = edit_configuration(&Default::default(), Some("this_editor_does_not_exist"));
+        let outcome = edit_configuration(&Context::default(), Some("this_editor_does_not_exist"));
         assert!(outcome.is_err());
     }
 
@@ -430,7 +434,7 @@ mod tests {
         assert_eq!(toml::Value::Table(expected_config), actual_config);
     }
 
-    fn create_doc() -> Document {
+    fn create_doc() -> DocumentMut {
         let config = concat!(
             " # comment\n",
             "  [status] # comment\n",
@@ -439,7 +443,7 @@ mod tests {
             "\n"
         );
 
-        config.parse::<Document>().unwrap()
+        config.parse::<DocumentMut>().unwrap()
     }
 
     #[test]
@@ -460,7 +464,7 @@ mod tests {
             "\n"
         );
 
-        assert_eq!(doc.to_string(), new_config)
+        assert_eq!(doc.to_string(), new_config);
     }
 
     #[test]
@@ -525,7 +529,7 @@ mod tests {
             "\n"
         );
 
-        assert_eq!(doc.to_string(), new_config)
+        assert_eq!(doc.to_string(), new_config);
     }
 
     #[test]
@@ -570,9 +574,11 @@ mod tests {
 
         handle_update_configuration(&mut doc, "a.b.c.d.e.f.g.h", "true").unwrap();
 
-        assert!(doc["a"]["b"]["c"]["d"]["e"]["f"]["g"]["h"]
-            .as_bool()
-            .unwrap())
+        assert!(
+            doc["a"]["b"]["c"]["d"]["e"]["f"]["g"]["h"]
+                .as_bool()
+                .unwrap()
+        );
     }
 
     #[test]
@@ -623,6 +629,7 @@ mod tests {
         Ok(())
     }
 
+    #[derive(Clone, Copy)]
     enum StarshipConfigEnvScenario {
         NotSpecified,
         NonExistingFile,
@@ -647,7 +654,7 @@ mod tests {
         dir: &TempDir,
         home_file_exists: bool,
         starship_config_env_scenario: StarshipConfigEnvScenario,
-    ) -> io::Result<Context> {
+    ) -> io::Result<Context<'_>> {
         let config_path = dir.path().to_path_buf().join(".config");
         create_dir(&config_path)?;
         let home_starship_toml = config_path.join("starship.toml");
@@ -677,11 +684,11 @@ mod tests {
         );
 
         Ok(Context::new_with_shell_and_path(
-            Default::default(),
+            Properties::default(),
             Shell::Unknown,
             Target::Main,
-            Default::default(),
-            Default::default(),
+            PathBuf::default(),
+            PathBuf::default(),
             env,
         ))
     }

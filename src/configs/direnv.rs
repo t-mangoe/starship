@@ -13,25 +13,29 @@ pub struct DirenvConfig<'a> {
     pub style: &'a str,
     pub disabled: bool,
     pub detect_extensions: Vec<&'a str>,
+    pub detect_env_vars: Vec<&'a str>,
     pub detect_files: Vec<&'a str>,
     pub detect_folders: Vec<&'a str>,
     pub allowed_msg: &'a str,
+    pub not_allowed_msg: &'a str,
     pub denied_msg: &'a str,
     pub loaded_msg: &'a str,
     pub unloaded_msg: &'a str,
 }
 
-impl<'a> Default for DirenvConfig<'a> {
+impl Default for DirenvConfig<'_> {
     fn default() -> Self {
         Self {
             format: "[$symbol$loaded/$allowed]($style) ",
             symbol: "direnv ",
-            style: "bold orange",
+            style: "bold bright-yellow",
             disabled: true,
             detect_extensions: vec![],
+            detect_env_vars: vec!["DIRENV_FILE"],
             detect_files: vec![".envrc"],
             detect_folders: vec![],
             allowed_msg: "allowed",
+            not_allowed_msg: "not allowed",
             denied_msg: "denied",
             loaded_msg: "loaded",
             unloaded_msg: "not loaded",

@@ -14,13 +14,9 @@
 
 This preset changes the symbols for several modules so that no Nerd Font symbols are used anywhere in the prompt.
 
-::: tip
+> [!TIP] This preset will become the default preset [in a future release of starship](https://github.com/starship/starship/pull/3544).
 
-This preset will become the default preset [in a future release of starship](https://github.com/starship/starship/pull/3544).
-
-:::
-
-[Click to view No Nerd Font preset](./no-nerd-font)
+[点击查看No Nerd Fonts预设](./no-nerd-font)
 
 ## [Bracketed Segments](./bracketed-segments.md)
 
@@ -44,7 +40,7 @@ This preset will become the default preset [in a future release of starship](htt
 
 This preset does not show icons if the toolset is not found.
 
-[![Screenshot of No Empty Icons preset](/presets/img/no-empty-icons.png "Click to view No Runtime Versions preset")](./no-empty-icons.md)
+[![No Empty Icons预设的截图](/presets/img/no-empty-icons.png "Click to view No Runtime Versions preset")](./no-empty-icons.md)
 
 ## [Pure Prompt](./pure-preset.md)
 
@@ -63,3 +59,21 @@ This preset does not show icons if the toolset is not found.
 此预设受 [tokyo-night-vscode-theme](https://github.com/enkia/tokyo-night-vscode-theme) 的启发。
 
 [![Tokyo Night预设预览](/presets/img/tokyo-night.png "Click to view Tokyo Night preset")](./tokyo-night)
+
+## [Gruvbox Rainbow](./gruvbox-rainbow.md)
+
+This preset is heavily inspired by [Pastel Powerline](./pastel-powerline.md), and [Tokyo Night](./tokyo-night.md).
+
+[![Screenshot of Gruvbox Rainbow preset](/presets/img/gruvbox-rainbow.png "Click to view Gruvbox Rainbow preset")](./gruvbox-rainbow)
+
+## [Jetpack](./jetpack.md)
+
+这是一个伪最简的预设，灵感来自 [geometry](https://github.com/geometry-zsh/geometry) 和   [spaceship](https://github.com/spaceship-prompt/spaceship-prompt)。
+
+[![Jetpack 预设的屏幕截图](/presets/img/jetpack.png "Click to view Jetpack preset")](./jetpack)
+
+## [Catppuccin Powerline](./catppuccin-powerline.md)
+
+This preset is a minimally modified version of [Gruvbox Rainbow](./gruvbox-rainbow.md) using the [Catppuccin](https://github.com/catppuccin/catppuccin) theme palette.
+
+[![Screenshot of Catppuccin Powerline preset](/presets/img/catppuccin-powerline.png "Click to view Catppuccin Powerline preset")](./catppuccin-powerline)

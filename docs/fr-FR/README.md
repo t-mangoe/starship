@@ -1,10 +1,14 @@
 ---
-home: true
-heroImage: /logo.svg
-heroText:
-tagline: L'invite minimaliste, ultra-rapide et personnalisable à l'infini pour n'importe quel shell !
-actionText: Commencez →
-actionLink: ./guide/
+layout: home
+hero:
+  image: /logo.svg
+  text:
+  tagline: L'invite minimaliste, ultra-rapide et personnalisable à l'infini pour n'importe quel shell !
+  actions:
+    - 
+      theme: brand
+      text: Commencez →
+      link: ./guide/
 features:
   - 
     title: Compatibilité avant tout
@@ -14,23 +18,35 @@ features:
     details: Profitez de toute la rapidité et la sécurité de Rust pour rendre votre invite de commandes la plus rapide et fiable possible.
   - 
     title: Personnalisable
-    details: Tous les petits détails sont personnalisable à votre goût, pour rendre votre invite de commandes aussi légère ou complète que le vous souhaitez.
+    details: Tous les petits détails sont personnalisables à votre goût, pour rendre votre invite de commandes aussi légère ou complète que vous le souhaitez.
 footer: Licence ISC | Copyright © 2019-présent Contributeurs Starship
 #Used for the description meta tag, for SEO
 metaTitle: "Starship : Invite Multi-Shell"
 description: Starship est une invite minimaliste, ultra-rapide et hautement personnalisable pour n'importe quel shell ! Montre les informations dont vous avez besoin tout en restant élégante et minimaliste. Installation rapide disponible pour Bash, Fish, ZSH, Ion, Tcsh, Elvish, Nu, Xonsh, Cmd, et PowerShell.
 ---
 
-<div class="center">
-  <video class="demo-video" muted autoplay loop playsinline>
-    <source src="/demo.webm" type="video/webm">
-    <source src="/demo.mp4" type="video/mp4">
-  </video>
-</div>
+<script setup>
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.has('uwu') || urlParams.has('kawaii')) {
+    const img = document.querySelector('.VPHero .VPImage.image-src')
+    img.classList.add('uwu')
+    img.src = '/logo-uwu.png'
+    img.alt = 'Kawaii Starship Logo by @sawaratsuki1004'
+  }
+})
+</script>
+
+<video class="demo-video" muted autoplay loop playsinline>
+  <source src="/demo.webm" type="video/webm">
+  <source src="/demo.mp4" type="video/mp4">
+</video>
 
 ### Pré-requis
 
-- Une [Nerd Font](https://www.nerdfonts.com/) est installée et activée dans votre terminal.
+- Une police d'écriture [Nerd Font](https://www.nerdfonts.com/) est installée et activée dans votre terminal.
 
 ### Installation
 
@@ -55,7 +71,8 @@ description: Starship est une invite minimaliste, ultra-rapide et hautement pers
    ```sh
    brew install starship
    ```
-   With [Winget](https://github.com/microsoft/winget-cli):
+
+   Avec [Winget](https://github.com/microsoft/winget-cli):
 
    ```powershell
    winget install starship
@@ -119,19 +136,16 @@ description: Starship est une invite minimaliste, ultra-rapide et hautement pers
 
    #### Elvish
 
-   ::: warning
+   > [!WARNING] Only elvish v0.18 or higher is supported.
 
-   Seul elvish v0.18 ou supérieur est pris en charge.
-
-   :::
-
-   Ajoutez ce qui suit à la fin de `~/.elvish/rc.elv`:
+   Add the following to the end of `~/.config/elvish/rc.elv` (`%AppData%\elvish\rc.elv` on Windows):
 
    ```sh
    # ~/.elvish/rc.elv
 
    eval (starship init elvish)
    ```
+   For elvish versions prior to v0.21.0 the config file might instead be `~/.elvish/rc.elv`
 
 
    #### Tcsh
@@ -147,22 +161,13 @@ description: Starship est une invite minimaliste, ultra-rapide et hautement pers
 
    #### Nushell
 
-   ::: warning
+   > [!WARNING] This will change in the future. Seul Nushell v0.96+ est supporté.
 
-   Ceci va changer dans le futur. Seul Nushell v0.78+ est supporté.
-
-   :::
-
-   Add the following to the end of your Nushell env file (find it by running `$nu.env-path` in Nushell):
-   ```sh
-   mkdir ~/.cache/starship
-   starship init nu | save -f ~/.cache/starship/init.nu
-   ```
-
-   Ajoutez le code suivant à la fin de votre configuration Nushell (trouvez-la en exécutant `$nu.config path`):
+   Ajoutez la ligne suivante à la fin de votre configuration Nushell (trouvable en exécutant `$nu.config-path` dans Nushell) :
 
    ```sh
-   use ~/.cache/starship/init.nu
+   mkdir ($nu.data-dir | path join "vendor/autoload")
+   starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
    ```
 
 

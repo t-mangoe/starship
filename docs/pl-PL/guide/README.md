@@ -32,6 +32,11 @@
       src="https://img.shields.io/badge/twitter-@StarshipPrompt-1DA1F3?style=flat-square"
       alt="Śledź @StarshipPrompt na Twitterze"
  /></a>
+  <a href="https://stand-with-ukraine.pp.ua"
+    ><img
+      src="https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraineFlat.svg"
+      alt="Wspieraj Ukrainę"
+ /></a>
 </p>
 
 <p align="center">
@@ -147,8 +152,6 @@
  /></a>
 </p>
 
-[![SWUbaner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
-
 <h1></h1>
 
 <img
@@ -226,9 +229,13 @@ Alternatywnie, zainstaluj Starship używając dowolnego z następujących mened�
 | Alpine Linux 3.13+ | [Alpine Linux Packages](https://pkgs.alpinelinux.org/packages?name=starship)                    | `apk dodaj starship`                                                           |
 | Arch Linux         | [Arch Linux Extra](https://archlinux.org/packages/extra/x86_64/starship)                        | `pacman -S starship`                                                           |
 | CentOS 7+          | [Copr](https://copr.fedorainfracloud.org/coprs/atim/starship)                                   | `dnf copr enable atim/starship` <br /> `dnf install starship` |
+| Debian 13+         | [Debian Main](https://sources.debian.org/src/starship/1.22.1-1/)                                | `apt install starship`                                                         |
+| Fedora 40+         | [Copr](https://copr.fedorainfracloud.org/coprs/atim/starship)                                   | `dnf copr enable atim/starship` <br /> `dnf install starship` |
 | Gentoo             | [Gentoo Packages](https://packages.gentoo.org/packages/app-shells/starship)                     | `emerge app-shells/starship`                                                   |
 | Manjaro            |                                                                                                 | `pacman -S starship`                                                           |
-| NixOS              | [nixpkgs](https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/misc/starship/default.nix)    | `nix-env -iA nixpkgs.starship`                                                 |
+| NixOS              | [nixpkgs](https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/st/starship/package.nix)    | `nix-env -iA nixpkgs.starship`                                                 |
+| openSUSE           | [OSS](https://software.opensuse.org/package/starship)                                           | `zypper in starship`                                                           |
+| Ubuntu 25.04+      | [Ubuntu Universe](https://packages.ubuntu.com/source/plucky/starship)                           | `apt install starship`                                                         |
 | Void Linux         | [Void Linux Packages](https://github.com/void-linux/void-packages/tree/master/srcpkgs/starship) | `xbps-install -S starship`                                                     |
 
 </details>
@@ -299,13 +306,13 @@ load(io.popen('starship init cmd'):read("*a"))()
 <details>
 <summary>Elvish</summary>
 
-Dodaj na koniec pliku `~/.elvish/rc.elv`:
+Add the following to the end of `~/.config/elvish/rc.elv` (`%AppData%\elvish\rc.elv` on Windows):
 
 ```sh
 eval (starship init elvish)
 ```
 
-Uwaga: Obsługiwany jest tylko Elvish w wersji v0.18 wzwyż
+Note: Only Elvish v0.18+ is supported. For elvish versions prior to v0.21.0 the config file might instead be `~/.elvish/rc.elv`
 
 </details>
 
@@ -334,20 +341,14 @@ eval $(starship init ion)
 <details>
 <summary>Nushell</summary>
 
-Dodaj następujący kod na koniec twojego pliku env Nushell (możesz go znaleść za pomocą `$nu.env-path` w Nushell):
+Add the following to the end of your Nushell configuration (find it by running `$nu.config-path` in Nushell):
 
 ```sh
-mkdir ~/.cache/starship
-starship init nu | save -f ~/.cache/starship/init.nu
+mkdir ($nu.data-dir | path join "vendor/autoload")
+starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
 ```
 
-Dodaj następujący kod na koniec Twojego pliku konfiguracyjnego Nushell (możesz go znaleźć uruchamiając `$nu.config-path`):
-
-```sh
-use ~/.cache/starship/init.nu
-```
-
-Uwaga: Obsługiwany jest tylko Nushell w wersji v0.78 wzwyż
+Uwaga: Obsługiwany jest tylko Nushell w wersji v0.96 wzwyż
 
 </details>
 
@@ -407,7 +408,7 @@ Lecz jeśli chcesz nieco dostosować Starship:
 
 ## 🤝Wspomóż nas
 
-Zawsze szukamy pomocy od osób **na każdym poziomie zaawansowania**! Jeśli potrzebujesz łatwiejszego wdrożenia w projekt, wypróbuj [good first issue](https://github.com/starship/starship/labels/🌱%20good%20first%20issue).
+Zawsze szukamy pomocy od osób **na każdym poziomie zaawansowania**! If you're looking to ease your way into the project, try out a [good first issue](https://github.com/starship/starship/labels/"🌱%20good%20first%20issue").
 
 Jeśli płynnie władasz językiem innym niż angielski, bardzo doceniamy każdą pomoc w tłumaczeniu dokumentacji. Jeśli chcesz pomóc, tłumaczenia można dodawać na [Crowdin Starship](https://translate.starship.rs/).
 
@@ -427,9 +428,16 @@ Zapoznaj się z wcześniejszymi projektami, które zainspirowały nas do stworze
 
 Wspomóż ten projekt [stając się sponsorem](https://github.com/sponsors/starship). Twoja nazwa bądź logo pojawi się tutaj wraz z linkiem do Twojej witryny.
 
-**Poziom Supporter**
+## 🔒 Code Signing Policy
 
-- [Appwrite](https://appwrite.io/)
+Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+Code Signing Roles:
+
+- Reviewers: [Astronauts](https://github.com/orgs/starship/teams/astronauts)
+- Approvers and Authors: [Mission Control](https://github.com/orgs/starship/teams/mission-control)
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
 
 <p align="center">
     <br>

@@ -5,7 +5,7 @@
 1. 下載 **starship** 執行檔到你的電腦裡
 1. 修改 shell 的初始化腳本，讓其使用 starship 作為提示字元
 
-對大部分的使用者來說，在[主頁面](/guide/#🚀-installation)的安裝指引皆足以正常運作。 然而，對於一些較特別的平台，我們需要不同的安裝指引。
+多數的使用者中， [主頁面](../guide/#🚀-installation)中的教學可以順利運作。  然而，對於一些較特別的平台，我們需要不同的安裝指引。
 
 有太多平台不適用於主要的 README.md 檔案了，所以這裡有一些來自社群的其他平台的安裝指引。 你的平台不在這裡嗎？ 如果你找出怎麼安裝，請幫我們加上你的指引！
 
@@ -23,29 +23,23 @@ choco install starship
 
 ## [termux](https://termux.com)
 
-### 先決要求
-
-```sh
-pkg install getconf
-```
-
 ### 安裝
 
 ```sh
-curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir /data/data/com.termux/files/usr/bin
+pkg install starship
 ```
 
 ## [Funtoo Linux](https://www.funtoo.org/Welcome)
 
 ### 安裝
 
-On Funtoo Linux, starship can be installed from [core-kit](https://github.com/funtoo/core-kit/tree/1.4-release/app-shells/starship) via Portage:
+在 Funtoo Linux，starship 可以透過 Portage 並從  [core-kit](https://github.com/funtoo/core-kit/tree/1.4-release/app-shells/starship) 中安裝：
 
 ```sh
 emerge app-shells/starship
 ```
 
-## [Nix](https://nixos.wiki/wiki/Nix)
+## [Nix](https://wiki.nixos.org/wiki/Nix)
 
 ### 獲得執行檔
 

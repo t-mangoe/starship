@@ -26,8 +26,12 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
             return Some("OCI".into());
         }
 
-        let container_env_path = context_path(context, "/run/.containerenv");
+        if context_path(context, "/dev/incus/sock").exists() {
+            // Incus
+            return Some("Incus".into());
+        }
 
+        let container_env_path = context_path(context, "/run/.containerenv");
         if container_env_path.exists() {
             // podman and others
 
@@ -35,6 +39,10 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
                 .map(|s| {
                     s.lines()
                         .find_map(|l| {
+                            if let Some(name_val) = l.strip_prefix("name=\"") {
+                                return name_val.strip_suffix('"').map(|n| n.to_string());
+                            }
+
                             l.starts_with("image=\"").then(|| {
                                 let r = l.split_at(7).1;
                                 let name = r.rfind('/').map(|n| r.split_at(n + 1).1);
@@ -97,7 +105,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     module.set_segments(match parsed {
         Ok(segments) => segments,
         Err(error) => {
-            log::warn!("Error in module `container`: \n{}", error);
+            log::warn!("Error in module `container`: \n{error}");
             return None;
         }
     });
@@ -127,7 +135,10 @@ mod tests {
         assert_eq!(expected, actual);
     }
 
-    fn containerenv(name: Option<&str>) -> std::io::Result<(Option<String>, Option<String>)> {
+    fn containerenv(
+        image: Option<&str>,
+        name: Option<&str>,
+    ) -> std::io::Result<(Option<String>, Option<String>)> {
         let renderer = ModuleRenderer::new("container")
             // For a custom config
             .config(toml::toml! {
@@ -147,10 +158,10 @@ mod tests {
 
         fs::create_dir_all(containerenv.parent().unwrap())?;
 
-        let contents = match name {
-            Some(name) => format!("image=\"{name}\"\n"),
-            None => String::new(),
-        };
+        let contents = name.map(|n| format!("name=\"{n}\"\n")).unwrap_or_default()
+            + &image
+                .map(|i| format!("image=\"{i}\"\n"))
+                .unwrap_or_default();
         utils::write_file(&containerenv, contents)?;
 
         // The output of the module
@@ -161,10 +172,10 @@ mod tests {
         // The value that should be rendered by the module.
         let expected = Some(format!(
             "{} ",
-            Color::Red
-                .bold()
-                .dimmed()
-                .paint(format!("⬢ [{}]", name.unwrap_or("podman")))
+            Color::Red.bold().dimmed().paint(format!(
+                "⬢ [{}]",
+                name.unwrap_or_else(|| image.unwrap_or("podman"))
+            ))
         ));
 
         Ok((actual, expected))
@@ -173,7 +184,7 @@ mod tests {
     #[test]
     #[cfg(target_os = "linux")]
     fn test_containerenv() -> std::io::Result<()> {
-        let (actual, expected) = containerenv(None)?;
+        let (actual, expected) = containerenv(None, None)?;
 
         // Assert that the actual and expected values are the same
         assert_eq!(actual, expected);
@@ -184,7 +195,18 @@ mod tests {
     #[test]
     #[cfg(target_os = "linux")]
     fn test_containerenv_fedora() -> std::io::Result<()> {
-        let (actual, expected) = containerenv(Some("fedora-toolbox:35"))?;
+        let (actual, expected) = containerenv(Some("fedora-toolbox:35"), None)?;
+
+        // Assert that the actual and expected values are the same
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_containerenv_fedora_with_name() -> std::io::Result<()> {
+        let (actual, expected) = containerenv(Some("fedora-toolbox:35"), Some("my-fedora"))?;
 
         // Assert that the actual and expected values are the same
         assert_eq!(actual, expected);
@@ -271,11 +293,39 @@ mod tests {
     #[test]
     #[cfg(not(target_os = "linux"))]
     fn test_containerenv() -> std::io::Result<()> {
-        let (actual, expected) = containerenv(None)?;
+        let (actual, expected) = containerenv(None, None)?;
 
         // Assert that the actual and expected values are not the same
         assert_ne!(actual, expected);
 
+        Ok(())
+    }
+
+    #[test]
+    #[cfg(target_os = "linux")]
+    fn test_incus_container() -> std::io::Result<()> {
+        let renderer = ModuleRenderer::new("container").config(toml::toml! {
+            [container]
+            disabled = false
+        });
+
+        let root_path = renderer.root_path();
+
+        // Create the Incus socket path
+        let incus_socket_path = root_path.join("dev/incus/sock");
+        fs::create_dir_all(incus_socket_path.parent().unwrap())?;
+        fs::File::create(&incus_socket_path)?;
+
+        // The output of the module
+        let actual = renderer.collect();
+
+        // The value that should be rendered by the module
+        let expected = Some(format!(
+            "{} ",
+            Color::Red.bold().dimmed().paint("⬢ [Incus]")
+        ));
+
+        assert_eq!(actual, expected);
         Ok(())
     }
 }

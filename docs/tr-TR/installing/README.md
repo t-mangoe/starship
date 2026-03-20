@@ -5,7 +5,7 @@ Starship'i kurmak için, 2 şeye ihtiyacınız var:
 1. **Starship** binary dosyalarını bilgisayarınıza alın
 1. Kabuğunuza Starship binary scriptini kullanmasını söyleyin
 
-Çoğu kullanıcı için, [ana sayfadaki](/guide/#🚀-installation) talimatlar gayet iyi çalışacaktır. Fakat, bazı özel platformlar için, farklı talimatlara ihtiyaç vardır.
+For most users, the instructions on [the main page](../guide/#🚀-installation) will work great. Fakat, bazı özel platformlar için, farklı talimatlara ihtiyaç vardır.
 
 Birçok platform var ki ana sisteme uymuyorlar. README.md belgesi ile diğer platformlar için bazı kurulum talimatları. Seninki burada değil mi? Anlarsan lütfen buraya ekle!
 
@@ -23,16 +23,10 @@ choco install starship
 
 ## [termux](https://termux.com)
 
-### Ön koşullar
-
-```sh
-pkg install getconf
-```
-
 ### Kurulum
 
 ```sh
-curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir /data/data/com.termux/files/usr/bin
+pkg install starship
 ```
 
 ## [Funtoo Linux](https://www.funtoo.org/Welcome)
@@ -45,7 +39,7 @@ On Funtoo Linux, starship can be installed from [core-kit](https://github.com/fu
 emerge app-shells/starship
 ```
 
-## [Nix](https://nixos.wiki/wiki/Nix)
+## [Nix](https://wiki.nixos.org/wiki/Nix)
 
 ### Binary Alma
 

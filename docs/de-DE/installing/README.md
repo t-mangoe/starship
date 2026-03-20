@@ -5,7 +5,7 @@ Um Starship zu installieren, musst du zwei Dinge tun:
 1. Lade die **starship** Datei auf den Computer herunter
 1. Weise deine Shell an die Starship Datei als Eingabeaufforderung zu nutzen, indem du eines der Initialisierungs-Skripte benutzt
 
-Die Anleitung auf [der Hauptseite](/guide/#🚀-installation) wird für die meisten Benutzer ausreichend sein. Für einige speziellere Plattformen wird jedoch eine speziellere Anleitung benötigt.
+For most users, the instructions on [the main page](../guide/#🚀-installation) will work great. Für einige speziellere Plattformen wird jedoch eine speziellere Anleitung benötigt.
 
 Es gibt sehr viele Plattformen, sodass diese nicht alle in die Hauptanleitung passen, aus diesem Grund sind hier ein paar Installationsanweisungen für ein paar Plattformen von der Community. Ist deine Platform nicht dabei? Dann füge bitte deine hinzu, sobald du herausgefunden hast wie man starship mit dieser benutzt!
 
@@ -23,16 +23,10 @@ choco install starship
 
 ## [termux](https://termux.com)
 
-### Voraussetzungen
-
-```sh
-pkg install getconf
-```
-
 ### Installation
 
 ```sh
-curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir /data/data/com.termux/files/usr/bin
+pkg install starship
 ```
 
 ## [Funtoo Linux](https://www.funtoo.org/Welcome)
@@ -45,7 +39,7 @@ Unter Funtoo Linux kann starship von [core-kit](https://github.com/funtoo/core-k
 emerge app-shells/starship
 ```
 
-## [Nix](https://nixos.wiki/wiki/Nix)
+## [Nix](https://wiki.nixos.org/wiki/Nix)
 
 ### Das Binary holen
 

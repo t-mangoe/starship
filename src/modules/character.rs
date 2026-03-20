@@ -37,7 +37,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     let mode = match (&context.shell, keymap) {
         (Shell::Fish, "default")
         | (Shell::Zsh, "vicmd")
-        | (Shell::Cmd | Shell::PowerShell, "vi") => ShellEditMode::Normal,
+        | (Shell::Cmd | Shell::PowerShell | Shell::Pwsh, "vi") => ShellEditMode::Normal,
         (Shell::Fish, "visual") => ShellEditMode::Visual,
         (Shell::Fish, "replace") => ShellEditMode::Replace,
         (Shell::Fish, "replace_one") => ShellEditMode::ReplaceOne,
@@ -70,7 +70,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     module.set_segments(match parsed {
         Ok(segments) => segments,
         Err(error) => {
-            log::warn!("Error in module `character`:\n{}", error);
+            log::warn!("Error in module `character`:\n{error}");
             return None;
         }
     });

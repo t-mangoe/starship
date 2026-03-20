@@ -32,6 +32,11 @@
       src="https://img.shields.io/badge/twitter-@StarshipPrompt-1DA1F3?style=flat-square"
       alt="Suivez @StarshipPrompt sur Twitter"
  /></a>
+  <a href="https://stand-with-ukraine.pp.ua"
+    ><img
+      src="https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraineFlat.svg"
+      alt="Soutenez l'Ukraine"
+ /></a>
 </p>
 
 <p align="center">
@@ -147,8 +152,6 @@
  /></a>
 </p>
 
-[![Bannière StandWithUkraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
-
 <h1></h1>
 
 <img
@@ -177,7 +180,7 @@
 
 ### Pré-requis
 
-- A [Nerd Font](https://www.nerdfonts.com/) installed and enabled in your terminal (for example, try the [FiraCode Nerd Font](https://www.nerdfonts.com/font-downloads)).
+- Une police d'écriture [Nerd Font](https://www.nerdfonts.com/) est installée et activée sur votre terminal (par exemple, essayez [FiraCode Nerd Font](https://www.nerdfonts.com/font-downloads)).
 
 ### Étape 1. Installer Starship
 
@@ -226,9 +229,13 @@ Vous pouvez aussi installer Starship en utilisant l’un de ces gestionnaires de
 | Alpine Linux 3.13+ | [Paquets Alpine Linux](https://pkgs.alpinelinux.org/packages?name=starship)                    | `apk add starship`                                                             |
 | Arch Linux         | [Arch Linux Extra](https://archlinux.org/packages/extra/x86_64/starship)                       | `pacman -S starship`                                                           |
 | CentOS 7+          | [Copr](https://copr.fedorainfracloud.org/coprs/atim/starship)                                  | `dnf copr enable atim/starship` <br /> `dnf install starship` |
+| Debian 13+         | [Debian principal](https://sources.debian.org/src/starship/1.22.1-1/)                          | `apt install starship`                                                         |
+| Fedora 40+         | [Copr](https://copr.fedorainfracloud.org/coprs/atim/starship)                                  | `dnf copr enable atim/starship` <br /> `dnf install starship` |
 | Gentoo             | [Paquets Gentoo](https://packages.gentoo.org/packages/app-shells/starship)                     | `emerge app-shells/starship`                                                   |
 | Manjaro            |                                                                                                | `pacman -S starship`                                                           |
-| NixOS              | [nixpkgs](https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/misc/starship/default.nix)   | `nix-env -iA nixpkgs.starship`                                                 |
+| NixOS              | [nixpkgs](https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/st/starship/package.nix)   | `nix-env -iA nixpkgs.starship`                                                 |
+| openSUSE           | [OSS](https://software.opensuse.org/package/starship)                                          | `zypper in starship`                                                           |
+| Ubuntu 25.04+      | [Ubuntu Universe](https://packages.ubuntu.com/source/plucky/starship)                          | `apt install starship`                                                         |
 | Void Linux         | [Paquets Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/starship) | `xbps-install -S starship`                                                     |
 
 </details>
@@ -256,7 +263,7 @@ Vous pouvez aussi installer Starship en utilisant l’un de ces gestionnaires de
 <details>
 <summary>Windows</summary>
 
-Install the latest version for your system with the MSI-installers from the [releases section](https://github.com/starship/starship/releases/latest).
+Installez la dernière version pour votre système à partir de l'installeur MSI de la [section publication](https://github.com/starship/starship/releases/latest).
 
 Installez Starship en utilisant l’un de ces gestionnaires de paquets:
 
@@ -270,14 +277,14 @@ Installez Starship en utilisant l’un de ces gestionnaires de paquets:
 
 </details>
 
-### Étape 2. Set up your shell to use Starship
+### Étape 2. Configurez votre Shell pour utiliser Starship
 
 Configurez votre shell pour initialiser starship. Sélectionnez le vôtre dans la liste ci-dessous:
 
 <details>
 <summary>Bash</summary>
 
-Ajoutez ce qui suit à la fin de `~/.bashrc`:
+Ajouter ce qui suit à la fin de `~/.bashrc`:
 
 ```sh
 eval "$(starship init bash)"
@@ -299,20 +306,20 @@ load(io.popen('starship init cmd'):read("*a"))()
 <details>
 <summary>Elvish</summary>
 
-Ajoutez ce qui suit à la fin de `~/.elvish/rc.elv`:
+Add the following to the end of `~/.config/elvish/rc.elv` (`%AppData%\elvish\rc.elv` on Windows):
 
 ```sh
 eval (starship init elvish)
 ```
 
-Note: Seul Elvish v0.18+ est supporté
+Note: Seul Elvish v0.18+ est supporté. For elvish versions prior to v0.21.0 the config file might instead be `~/.elvish/rc.elv`
 
 </details>
 
 <details>
 <summary>Fish</summary>
 
-Ajoutez le code suivant à la fin de `~/.config/fish/config.fish`:
+Ajoute ce qui suit à la fin de `~/.config/fish/config.fish`:
 
 ```fish
 starship init fish | source
@@ -323,7 +330,7 @@ starship init fish | source
 <details>
 <summary>Ion</summary>
 
-Ajoutez ce qui suit à la fin de `~/.config/ion/initrc`:
+Ajouter ce qui suit à la fin de `~/.config/ion/initrc`:
 
 ```sh
 eval $(starship init ion)
@@ -334,20 +341,14 @@ eval $(starship init ion)
 <details>
 <summary>Nushell</summary>
 
-Add the following to the end of your Nushell env file (find it by running `$nu.env-path` in Nushell):
+Ajoutez la ligne suivante à la fin de votre configuration Nushell (trouvable en exécutant `$nu.config-path` dans Nushell) :
 
 ```sh
-mkdir ~/.cache/starship
-starship init nu | save -f ~/.cache/starship/init.nu
+mkdir ($nu.data-dir | path join "vendor/autoload")
+starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
 ```
 
-Ajoutez le code suivant à la fin de votre configuration Nushell (trouvez-la en exécutant `$nu.config path`):
-
-```sh
-use ~/.cache/starship/init.nu
-```
-
-Note: Seul Nushell v0.78+ est supporté
+Note: Seul Nushell v0.96+ est supporté
 
 </details>
 
@@ -387,7 +388,7 @@ execx($(starship init xonsh))
 <details>
 <summary>Zsh</summary>
 
-Ajoutez ce qui suit à la fin de `~/.zshrc`:
+Ajouter ce qui suit à la fin de `~/.zshrc`:
 
 ```sh
 eval "$(starship init zsh)"
@@ -407,7 +408,7 @@ Si vous cherchez à personnaliser davantage Starship :
 
 ## 🤝 Contribuer
 
-Nous sommes toujours à la recherche de contributeurs de **tous niveaux de compétence**! Si vous cherchez à faciliter votre entrée dans le projet, essayez un [good first issue](https://github.com/starship/starship/labels/🌱%20good%20first%20issue).
+Nous sommes toujours à la recherche de contributeurs de **tous niveaux de compétence**! If you're looking to ease your way into the project, try out a [good first issue](https://github.com/starship/starship/labels/"🌱%20good%20first%20issue").
 
 Si vous parlez couramment une langue autre que l'anglais, nous apprécions grandement toute aide pour traduire et mettre à jour notre documentation dans d'autres langues. Si vous souhaitez nous aider, les traductions se font sur le [Crowdin Starship](https://translate.starship.rs/).
 
@@ -427,9 +428,16 @@ Voyez ces travaux précédents qui ont contribué à inspirer la création de St
 
 Soutenez ce projet en [devenant un collaborateur](https://github.com/sponsors/starship). Votre nom ou logo apparaîtra ici avec un lien vers votre site Web.
 
-**Palier Collaborateur**
+## 🔒 Code Signing Policy
 
-- [Appwrite](https://appwrite.io/)
+Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+Code Signing Roles:
+
+- Reviewers: [Astronauts](https://github.com/orgs/starship/teams/astronauts)
+- Approvers and Authors: [Mission Control](https://github.com/orgs/starship/teams/mission-control)
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
 
 <p align="center">
     <br>

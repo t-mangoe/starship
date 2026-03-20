@@ -7,12 +7,14 @@ pub mod battery;
 pub mod buf;
 pub mod bun;
 pub mod c;
+pub mod cc;
 pub mod character;
 pub mod cmake;
 pub mod cmd_duration;
 pub mod cobol;
 pub mod conda;
 pub mod container;
+pub mod cpp;
 pub mod crystal;
 pub mod custom;
 pub mod daml;
@@ -28,6 +30,7 @@ pub mod env_var;
 pub mod erlang;
 pub mod fennel;
 pub mod fill;
+pub mod fortran;
 pub mod fossil_branch;
 pub mod fossil_metrics;
 pub mod gcloud;
@@ -36,6 +39,7 @@ pub mod git_commit;
 pub mod git_metrics;
 pub mod git_state;
 pub mod git_status;
+pub mod gleam;
 pub mod go;
 pub mod gradle;
 pub mod guix_shell;
@@ -43,6 +47,7 @@ pub mod haskell;
 pub mod haxe;
 pub mod helm;
 pub mod hg_branch;
+pub mod hg_state;
 pub mod hostname;
 pub mod java;
 pub mod jobs;
@@ -52,12 +57,18 @@ pub mod kubernetes;
 pub mod line_break;
 pub mod localip;
 pub mod lua;
+pub mod maven;
 pub mod memory_usage;
 pub mod meson;
+pub mod mise;
+pub mod mojo;
+pub mod nats;
+pub mod netns;
 pub mod nim;
 pub mod nix_shell;
 pub mod nodejs;
 pub mod ocaml;
+pub mod odin;
 pub mod opa;
 pub mod openstack;
 pub mod os;
@@ -65,9 +76,11 @@ pub mod package;
 pub mod perl;
 pub mod php;
 pub mod pijul_channel;
+pub mod pixi;
 pub mod pulumi;
 pub mod purescript;
 pub mod python;
+pub mod quarto;
 pub mod raku;
 pub mod red;
 pub mod rlang;
@@ -89,7 +102,9 @@ pub mod typst;
 pub mod username;
 pub mod v;
 pub mod vagrant;
+pub mod vcs;
 pub mod vcsh;
+pub mod xmake;
 pub mod zig;
 
 pub use starship_root::*;
@@ -134,6 +149,8 @@ pub struct FullConfig<'a> {
     #[serde(borrow)]
     container: container::ContainerConfig<'a>,
     #[serde(borrow)]
+    cpp: cpp::CppConfig<'a>,
+    #[serde(borrow)]
     crystal: crystal::CrystalConfig<'a>,
     #[serde(borrow)]
     daml: daml::DamlConfig<'a>,
@@ -162,6 +179,8 @@ pub struct FullConfig<'a> {
     #[serde(borrow)]
     fill: fill::FillConfig<'a>,
     #[serde(borrow)]
+    fortran: fortran::FortranConfig<'a>,
+    #[serde(borrow)]
     fossil_branch: fossil_branch::FossilBranchConfig<'a>,
     #[serde(borrow)]
     fossil_metrics: fossil_metrics::FossilMetricsConfig<'a>,
@@ -178,6 +197,8 @@ pub struct FullConfig<'a> {
     #[serde(borrow)]
     git_status: git_status::GitStatusConfig<'a>,
     #[serde(borrow)]
+    gleam: gleam::GleamConfig<'a>,
+    #[serde(borrow)]
     golang: go::GoConfig<'a>,
     #[serde(borrow)]
     gradle: gradle::GradleConfig<'a>,
@@ -191,6 +212,8 @@ pub struct FullConfig<'a> {
     helm: helm::HelmConfig<'a>,
     #[serde(borrow)]
     hg_branch: hg_branch::HgBranchConfig<'a>,
+    #[serde(borrow)]
+    hg_state: hg_state::HgStateConfig<'a>,
     #[serde(borrow)]
     hostname: hostname::HostnameConfig<'a>,
     #[serde(borrow)]
@@ -209,9 +232,19 @@ pub struct FullConfig<'a> {
     #[serde(borrow)]
     lua: lua::LuaConfig<'a>,
     #[serde(borrow)]
+    maven: maven::MavenConfig<'a>,
+    #[serde(borrow)]
     memory_usage: memory_usage::MemoryConfig<'a>,
     #[serde(borrow)]
     meson: meson::MesonConfig<'a>,
+    #[serde(borrow)]
+    mise: mise::MiseConfig<'a>,
+    #[serde(borrow)]
+    mojo: mojo::MojoConfig<'a>,
+    #[serde(borrow)]
+    nats: nats::NatsConfig<'a>,
+    #[serde(borrow)]
+    netns: netns::NetnsConfig<'a>,
     #[serde(borrow)]
     nim: nim::NimConfig<'a>,
     #[serde(borrow)]
@@ -220,6 +253,8 @@ pub struct FullConfig<'a> {
     nodejs: nodejs::NodejsConfig<'a>,
     #[serde(borrow)]
     ocaml: ocaml::OCamlConfig<'a>,
+    #[serde(borrow)]
+    odin: odin::OdinConfig<'a>,
     #[serde(borrow)]
     opa: opa::OpaConfig<'a>,
     #[serde(borrow)]
@@ -235,11 +270,15 @@ pub struct FullConfig<'a> {
     #[serde(borrow)]
     pijul_channel: pijul_channel::PijulConfig<'a>,
     #[serde(borrow)]
+    pixi: pixi::PixiConfig<'a>,
+    #[serde(borrow)]
     pulumi: pulumi::PulumiConfig<'a>,
     #[serde(borrow)]
     purescript: purescript::PureScriptConfig<'a>,
     #[serde(borrow)]
     python: python::PythonConfig<'a>,
+    #[serde(borrow)]
+    quarto: quarto::QuartoConfig<'a>,
     #[serde(borrow)]
     raku: raku::RakuConfig<'a>,
     #[serde(borrow)]
@@ -279,9 +318,13 @@ pub struct FullConfig<'a> {
     #[serde(borrow)]
     vagrant: vagrant::VagrantConfig<'a>,
     #[serde(borrow)]
+    vcs: vcs::VcsConfig<'a>,
+    #[serde(borrow)]
     vcsh: vcsh::VcshConfig<'a>,
     #[serde(borrow)]
     vlang: v::VConfig<'a>,
+    #[serde(borrow)]
+    xmake: xmake::XMakeConfig<'a>,
     #[serde(borrow)]
     zig: zig::ZigConfig<'a>,
     #[serde(borrow)]

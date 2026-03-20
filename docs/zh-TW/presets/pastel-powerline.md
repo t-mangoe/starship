@@ -1,4 +1,4 @@
-[Return to Presets](./README.md#pastel-powerline)
+[Return to Presets](./#pastel-powerline)
 
 # Pastel Powerline Preset
 
@@ -16,6 +16,6 @@ This preset is inspired by [M365Princess](https://github.com/JanDeDobbeleer/oh-m
 starship preset pastel-powerline -o ~/.config/starship.toml
 ```
 
-[Click to download TOML](/presets/toml/pastel-powerline.toml)
+[點擊此處下載 TOML](/presets/toml/pastel-powerline.toml){download}
 
-<<< @/.vuepress/public/presets/toml/pastel-powerline.toml
+<<< @/public/presets/toml/pastel-powerline.toml

@@ -1,4 +1,4 @@
-use indexmap::{indexmap, IndexMap};
+use indexmap::{IndexMap, indexmap};
 use os_info::Type;
 use serde::{Deserialize, Serialize};
 
@@ -17,25 +17,32 @@ pub struct OSConfig<'a> {
 }
 
 impl<'a> OSConfig<'a> {
-    pub fn get_symbol(&self, key: &Type) -> Option<&'a str> {
-        self.symbols.get(key).copied()
+    pub fn get_symbol(&self, key: Type) -> Option<&'a str> {
+        self.symbols.get(&key).copied()
     }
 }
 
-impl<'a> Default for OSConfig<'a> {
+impl Default for OSConfig<'_> {
     fn default() -> Self {
-        OSConfig {
+        Self {
             format: "[$symbol]($style)",
             style: "bold white",
             symbols: indexmap! {
+                Type::AIX => "➿ ",
                 Type::Alpaquita => "🔔 ",
+                Type::AlmaLinux => "💠 ",
                 Type::Alpine => "🏔️ ",
+                Type::ALTLinux => "Ⓐ ",
                 Type::Amazon => "🙂 ",
                 Type::Android => "🤖 ",
+                Type::AOSC => "🐱 ",
                 Type::Arch => "🎗️ ",
                 Type::Artix => "🎗️ ",
+                Type::Bluefin => "🐟 ",
+                Type::CachyOS => "🎗️ ",
                 Type::CentOS => "💠 ",
                 Type::Debian => "🌀 ",
+                Type::Elementary => "🍏 ",
                 Type::DragonFly => "🐉 ",
                 Type::Emscripten => "🔗 ",
                 Type::EndeavourOS => "🚀 ",
@@ -45,6 +52,9 @@ impl<'a> Default for OSConfig<'a> {
                 Type::Gentoo => "🗜️ ",
                 Type::HardenedBSD => "🛡️ ",
                 Type::Illumos => "🐦 ",
+                Type::Ios => "📱 ",
+                Type::InstantOS => "⏲️ ",
+                Type::Kali => "🐉 ",
                 Type::Linux => "🐧 ",
                 Type::Mabox => "📦 ",
                 Type::Macos => "🍎 ",
@@ -54,32 +64,35 @@ impl<'a> Default for OSConfig<'a> {
                 Type::Mint => "🌿 ",
                 Type::NetBSD => "🚩 ",
                 Type::NixOS => "❄️ ",
+                Type::Nobara =>  "🎩 ",
                 Type::OpenBSD => "🐡 ",
                 Type::OpenCloudOS => "☁️ ",
                 Type::openEuler => "🦉 ",
                 Type::openSUSE => "🦎 ",
                 Type::OracleLinux => "🦴 ",
+                Type::PikaOS => "🐤 ",
                 Type::Pop => "🍭 ",
                 Type::Raspbian => "🍓 ",
                 Type::Redhat => "🎩 ",
                 Type::RedHatEnterprise => "🎩 ",
+                Type::RockyLinux => "💠 ",
                 Type::Redox => "🧪 ",
                 Type::Solus => "⛵ ",
                 Type::SUSE => "🦎 ",
                 Type::Ubuntu => "🎯 ",
+                Type::Ultramarine => "🔷 ",
                 Type::Unknown => "❓ ",
+                Type::Uos => "🐲 ",
+                Type::Void => " ",
                 Type::Windows => "🪟 ",
+                Type::Zorin => "🔹 ",
                 // Future symbols.
-                //aosc =>       " ",
-                //artix =>      " ",
                 //coreos =>     " ",
                 //devuan =>     " ",
-                //elementary => " ",
                 //mageia =>     " ",
                 //mandriva =>   " ",
                 //sabayon =>    " ",
                 //slackware =>  " ",
-                //void =>       " ",
                 //solaris =>    " ",
             },
             disabled: true,

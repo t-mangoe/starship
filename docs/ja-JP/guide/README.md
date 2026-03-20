@@ -32,6 +32,11 @@
       src="https://img.shields.io/badge/twitter-@StarshipPrompt-1DA1F3?style=flat-square"
       alt="Follow @StarshipPrompt on Twitter"
  /></a>
+  <a href="https://stand-with-ukraine.pp.ua"
+    ><img
+      src="https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraineFlat.svg"
+      alt="ウクライナと共に歩む"
+ /></a>
 </p>
 
 <p align="center">
@@ -147,8 +152,6 @@
  /></a>
 </p>
 
-[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine)
-
 <h1></h1>
 
 <img
@@ -158,7 +161,7 @@
   align="right"
  />
 
-**シェル用の最小限の、非常に高速で、無限にカスタマイズ可能なプロンプトです！**
+**最小限の、非常に高速で、無限にカスタマイズ可能なシェル用のプロンプトです！**
 
 - **高速:** _本当に_ 高速です！ 🚀
 - **カスタマイズ可能:** プロンプトのあらゆる側面を構成します。
@@ -177,7 +180,7 @@
 
 ### 必要なもの
 
-- A [Nerd Font](https://www.nerdfonts.com/) installed and enabled in your terminal (for example, try the [FiraCode Nerd Font](https://www.nerdfonts.com/font-downloads)).
+- [Nerd Font](https://www.nerdfonts.com/)がインストールされ、端末にて有効になっている（例えば、[FiraCode Nerd Font](https://www.nerdfonts.com/font-downloads)を試してみてください）。
 
 ### Step 1. Starshipをインストール
 
@@ -226,9 +229,13 @@ curl -sS https://starship.rs/install.sh | sh
 | Alpine Linux 3.13+ | [Alpine Linux Packages](https://pkgs.alpinelinux.org/packages?name=starship)                    | `apk add starship`                                                             |
 | Arch Linux         | [Arch Linux Extra](https://archlinux.org/packages/extra/x86_64/starship)                        | `pacman -S starship`                                                           |
 | CentOS 7+          | [Copr](https://copr.fedorainfracloud.org/coprs/atim/starship)                                   | `dnf copr enable atim/starship` <br /> `dnf install starship` |
+| Debian 13+         | [Debian Main](https://sources.debian.org/src/starship/1.22.1-1/)                                | `apt install starship`                                                         |
+| Fedora 40+         | [Copr](https://copr.fedorainfracloud.org/coprs/atim/starship)                                   | `dnf copr enable atim/starship` <br /> `dnf install starship` |
 | Gentoo             | [Gentoo Packages](https://packages.gentoo.org/packages/app-shells/starship)                     | `emerge app-shells/starship`                                                   |
 | Manjaro            |                                                                                                 | `pacman -S starship`                                                           |
-| NixOS              | [nixpkgs](https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/misc/starship/default.nix)    | `nix-env -iA nixpkgs.starship`                                                 |
+| NixOS              | [nixpkgs](https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/st/starship/package.nix)    | `nix-env -iA nixpkgs.starship`                                                 |
+| openSUSE           | [OSS](https://software.opensuse.org/package/starship)                                           | `zypper in starship`                                                           |
+| Ubuntu 25.04+      | [Ubuntu Universe](https://packages.ubuntu.com/source/plucky/starship)                           | `apt install starship`                                                         |
 | Void Linux         | [Void Linux Packages](https://github.com/void-linux/void-packages/tree/master/srcpkgs/starship) | `xbps-install -S starship`                                                     |
 
 </details>
@@ -270,7 +277,7 @@ curl -sS https://starship.rs/install.sh | sh
 
 </details>
 
-### Step 2. Set up your shell to use Starship
+### Step 2. Starshipをシェルにセットアップ
 
 Starshipを初期化するためのシェルの設定。 以下のリストからお使いのシェルを選択してください。
 
@@ -299,13 +306,13 @@ load(io.popen('starship init cmd'):read("*a"))()
 <details>
 <summary>Elvish</summary>
 
-`~/.elvish/rc.elv` の最後に以下を追記してください。
+Add the following to the end of `~/.config/elvish/rc.elv` (`%AppData%\elvish\rc.elv` on Windows):
 
 ```sh
 eval (starship init elvish)
 ```
 
-注意: Elvish v0.18以降でサポートされています
+注意: Elvish v0.18以降でサポートされています. For elvish versions prior to v0.21.0 the config file might instead be `~/.elvish/rc.elv`
 
 </details>
 
@@ -334,27 +341,21 @@ eval $(starship init ion)
 <details>
 <summary>Nushell</summary>
 
-Nushellの環境ファイルの最後に以下を追記してください ( `$nu.env-path` を実行してください):
+Add the following to the end of your Nushell configuration (find it by running `$nu.config-path` in Nushell):
 
 ```sh
-mkdir ~/.cache/starship
-starship init nu | save -f ~/.cache/starship/init.nu
+mkdir ($nu.data-dir | path join "vendor/autoload")
+starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
 ```
 
-そして、Nushellの設定ファイルの最後に以下を追加してください（ `$nu.config-path` を実行してください）。
-
-```sh
-use ~/.cache/starship/init.nu
-```
-
-注意: Elvish v0.78以降でサポートされています
+注意: Nushell v0.96以降でサポートされています
 
 </details>
 
 <details>
 <summary>PowerShell</summary>
 
-PowerShellの設定ファイルの最後に以下を追記してください (`$PROFILE` を実行してください):
+PowerShellの設定ファイルの最後に以下を追加してください（ `$PROFILE` を実行してください）:
 
 ```powershell
 Invoke-Expression (&starship init powershell)
@@ -407,7 +408,7 @@ Starshipのさらなるカスタマイズを目指すなら以下を参考にし
 
 ## 🤝 貢献
 
-私たちは常に**すべてのスキルレベル**の貢献者を探しています！ もし簡単にプロジェクトへ参加する方法をお探しなら、 [good first issue](https://github.com/starship/starship/labels/🌱%20good%20first%20issue) に取り組んでみてください。
+私たちは常に**すべてのスキルレベル**の貢献者を探しています！ If you're looking to ease your way into the project, try out a [good first issue](https://github.com/starship/starship/labels/"🌱%20good%20first%20issue").
 
 あなたが英語以外の言語に堪能な場合、ドキュメントの翻訳と更新に協力していただけると嬉しいです。 協力してくれる場合、翻訳は [Starship Crowdin](https://translate.starship.rs/) から貢献できます。
 
@@ -427,9 +428,16 @@ Starshipのさらなるカスタマイズを目指すなら以下を参考にし
 
 [スポンサーになることで](https://github.com/sponsors/starship)このプロジェクトをサポートできます。 名前やロゴがあなたのホームページへのリンクとともに表示されます。
 
-**スポンサーティア**
+## 🔒 コード署名のポリシー
 
-- [Appwrite](https://appwrite.io/)
+[SignPath.io](https://signpath.io)での無料のコード署名が[SignPath Foundation](https://signpath.org)によって提供されています。
+
+コード署名のロール：
+
+- レビュワー：[Astronauts](https://github.com/orgs/starship/teams/astronauts)
+- Approver、Author：[Mission Control](https://github.com/orgs/starship/teams/mission-control)
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
 
 <p align="center">
     <br>

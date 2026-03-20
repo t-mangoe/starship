@@ -1,8 +1,8 @@
-[プリセット一覧に戻る](./README.md#bracketed-segments)
+[プリセット一覧に戻る](./#bracketed-segments)
 
 # Bracketed Segmentsプリセット
 
-このプリセットは付属のモジュール全てのフォーマットを変更し、デフォルトのStarshipの表示("via", "on", etc.)から、それぞれの情報を括弧で区分けするように変更します。
+このプリセットは付属のモジュール全てのフォーマットを変更し、デフォルトのStarshipの表示("via", "on", etc.) から、それぞれの情報を括弧で区分けするように変更します。
 
 ![Bracketed Segmentsプリセットのスクリーンショット](/presets/img/bracketed-segments.png)
 
@@ -12,6 +12,6 @@
 starship preset bracketed-segments -o ~/.config/starship.toml
 ```
 
-[クリックしてTOMLをダウンロード](/presets/toml/bracketed-segments.toml)
+[Click to download TOML](/presets/toml/bracketed-segments.toml){download}
 
-<<< @/.vuepress/public/presets/toml/bracketed-segments.toml
+<<< @/public/presets/toml/bracketed-segments.toml

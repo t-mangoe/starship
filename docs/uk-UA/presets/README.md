@@ -14,11 +14,7 @@
 
 Цей стиль змінює символи для кількох модулів, щоб жодні символи Nerd Font не використовувалися в командному рядку.
 
-::: tip
-
-Цей шаблон стане стандартним в [майбутньому випуску starship](https://github.com/starship/starship/pull/3544).
-
-:::
+> [!TIP] Цей шаблон стане стандартним [у наступних випусках starship](https://github.com/starship/starship/pull/3544).
 
 [Натисніть для перегляду шаблона No Nerd Font](./no-nerd-font)
 
@@ -63,3 +59,21 @@
 Цей шаблон створений під враженням від [tokyo-night-vscode-theme](https://github.com/enkia/tokyo-night-vscode-theme).
 
 [![Скріншот шаблона Tokyo Night](/presets/img/tokyo-night.png "Натисніть, щоб переглянути шаблон Токіо Night")](./tokyo-night)
+
+## [Gruvbox Rainbow](./gruvbox-rainbow.md)
+
+Цей шаблон створено під впливом [Pastel Powerline](./pastel-powerline.md) та [Tokyo Night](./tokyo-night.md).
+
+[![Скріншот шаблона Gruvbox Rainbow](/presets/img/gruvbox-rainbow.png "Натисніть, щоб переглянути шаблон Gruvbox Rainbow")](./gruvbox-rainbow)
+
+## [Jetpack](./jetpack.md)
+
+Цей псевдомінімалістичний шаблон створений під враженням від [geometry](https://github.com/geometry-zsh/geometry) та [spaceship](https://github.com/spaceship-prompt/spaceship-prompt).
+
+[![Скріншот шаблона Jetpack](/presets/img/jetpack.png "Натисніть для перегляду шаблона  Jetpack")](./jetpack)
+
+## [Catppuccin Powerline](./catppuccin-powerline.md)
+
+Цей шаблон є трохи зміненою версією [Gruvbox Rainbow](./gruvbox-rainbow.md), що використовує палітру [Catppuccin](https://github.com/catppuccin/catppuccin).
+
+[![Скріншот шаблона Catppuccin Powerline](/presets/img/catppuccin-powerline.png "Натисніть, щоб переглянути шаблон Catppucin Powerline")](./catppuccin-powerline)

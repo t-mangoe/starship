@@ -5,13 +5,14 @@ use std::os::unix::fs::MetadataExt;
 use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 
+#[allow(clippy::doc_overindented_list_items)]
 /// Checks if the current user can write to the `folder_path`.
 ///
 /// It extracts Unix access rights from the directory and checks whether
 /// 1) the current user is the owner of the directory and whether it has the write access
 /// 2) the current user's primary group is the directory group owner whether if it has write access
-/// 2a) (not implemented on macOS) one of the supplementary groups of the current user is the
-/// directory group owner and whether it has write access
+///    2a) (not implemented on macOS) one of the supplementary groups of the current user is the
+///        directory group owner and whether it has write access
 /// 3) 'others' part of the access mask has the write access
 #[allow(clippy::useless_conversion)] // On some platforms it is not u32
 pub fn is_write_allowed(folder_path: &Path) -> Result<bool, String> {
@@ -37,10 +38,11 @@ pub fn is_write_allowed(folder_path: &Path) -> Result<bool, String> {
 
 #[cfg(all(unix, not(any(target_os = "macos", target_os = "ios"))))]
 fn get_supplementary_groups() -> Vec<u32> {
-    match nix::unistd::getgroups() {
-        Err(_) => Vec::new(),
-        Ok(v) => v.into_iter().map(nix::unistd::Gid::as_raw).collect(),
-    }
+    nix::unistd::getgroups()
+        .unwrap_or_default()
+        .into_iter()
+        .map(nix::unistd::Gid::as_raw)
+        .collect()
 }
 
 #[cfg(all(unix, any(target_os = "macos", target_os = "ios")))]

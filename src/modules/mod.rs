@@ -4,12 +4,14 @@ mod azure;
 mod buf;
 mod bun;
 mod c;
+mod cc;
 mod character;
 mod cmake;
 mod cmd_duration;
 mod cobol;
 mod conda;
 mod container;
+mod cpp;
 mod crystal;
 pub mod custom;
 mod daml;
@@ -25,6 +27,7 @@ mod env_var;
 mod erlang;
 mod fennel;
 mod fill;
+mod fortran;
 mod fossil_branch;
 mod fossil_metrics;
 mod gcloud;
@@ -32,7 +35,8 @@ mod git_branch;
 mod git_commit;
 mod git_metrics;
 mod git_state;
-mod git_status;
+pub(crate) mod git_status;
+mod gleam;
 mod golang;
 mod gradle;
 mod guix_shell;
@@ -40,6 +44,7 @@ mod haskell;
 mod haxe;
 mod helm;
 mod hg_branch;
+mod hg_state;
 mod hostname;
 mod java;
 mod jobs;
@@ -49,12 +54,18 @@ mod kubernetes;
 mod line_break;
 mod localip;
 mod lua;
+mod maven;
 mod memory_usage;
 mod meson;
+mod mise;
+mod mojo;
+mod nats;
+mod netns;
 mod nim;
 mod nix_shell;
 mod nodejs;
 mod ocaml;
+mod odin;
 mod opa;
 mod openstack;
 mod os;
@@ -62,9 +73,11 @@ mod package;
 mod perl;
 mod php;
 mod pijul_channel;
+mod pixi;
 mod pulumi;
 mod purescript;
 mod python;
+mod quarto;
 mod raku;
 mod red;
 mod rlang;
@@ -84,8 +97,10 @@ mod time;
 mod username;
 mod utils;
 mod vagrant;
+mod vcs;
 mod vcsh;
 mod vlang;
+mod xmake;
 mod zig;
 
 #[cfg(feature = "battery")]
@@ -96,7 +111,7 @@ mod typst;
 pub use self::battery::{BatteryInfoProvider, BatteryInfoProviderImpl};
 
 use crate::config::ModuleConfig;
-use crate::context::{Context, Shell};
+use crate::context::{Context, Detected, Shell};
 use crate::module::Module;
 use std::time::Instant;
 
@@ -119,6 +134,7 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
             "cobol" => cobol::module(context),
             "conda" => conda::module(context),
             "container" => container::module(context),
+            "cpp" => cpp::module(context),
             "daml" => daml::module(context),
             "dart" => dart::module(context),
             "deno" => deno::module(context),
@@ -132,6 +148,7 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
             "env_var" => env_var::module(None, context),
             "fennel" => fennel::module(context),
             "fill" => fill::module(context),
+            "fortran" => fortran::module(context),
             "fossil_branch" => fossil_branch::module(context),
             "fossil_metrics" => fossil_metrics::module(context),
             "gcloud" => gcloud::module(context),
@@ -140,6 +157,7 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
             "git_metrics" => git_metrics::module(context),
             "git_state" => git_state::module(context),
             "git_status" => git_status::module(context),
+            "gleam" => gleam::module(context),
             "golang" => golang::module(context),
             "gradle" => gradle::module(context),
             "guix_shell" => guix_shell::module(context),
@@ -147,6 +165,7 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
             "haxe" => haxe::module(context),
             "helm" => helm::module(context),
             "hg_branch" => hg_branch::module(context),
+            "hg_state" => hg_state::module(context),
             "hostname" => hostname::module(context),
             "java" => java::module(context),
             "jobs" => jobs::module(context),
@@ -156,12 +175,18 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
             "line_break" => line_break::module(context),
             "localip" => localip::module(context),
             "lua" => lua::module(context),
+            "maven" => maven::module(context),
             "memory_usage" => memory_usage::module(context),
             "meson" => meson::module(context),
+            "mise" => mise::module(context),
+            "mojo" => mojo::module(context),
+            "nats" => nats::module(context),
+            "netns" => netns::module(context),
             "nim" => nim::module(context),
             "nix_shell" => nix_shell::module(context),
             "nodejs" => nodejs::module(context),
             "ocaml" => ocaml::module(context),
+            "odin" => odin::module(context),
             "opa" => opa::module(context),
             "openstack" => openstack::module(context),
             "os" => os::module(context),
@@ -169,9 +194,11 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
             "perl" => perl::module(context),
             "php" => php::module(context),
             "pijul_channel" => pijul_channel::module(context),
+            "pixi" => pixi::module(context),
             "pulumi" => pulumi::module(context),
             "purescript" => purescript::module(context),
             "python" => python::module(context),
+            "quarto" => quarto::module(context),
             "raku" => raku::module(context),
             "rlang" => rlang::module(context),
             "red" => red::module(context),
@@ -193,7 +220,9 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
             "username" => username::module(context),
             "vlang" => vlang::module(context),
             "vagrant" => vagrant::module(context),
+            "vcs" => vcs::module(context),
             "vcsh" => vcsh::module(context),
+            "xmake" => xmake::module(context),
             "zig" => zig::module(context),
             env if env.starts_with("env_var.") => {
                 env_var::module(env.strip_prefix("env_var."), context)
@@ -203,14 +232,16 @@ pub fn handle<'a>(module: &str, context: &'a Context) -> Option<Module<'a>> {
                 custom::module(custom.strip_prefix("custom.").unwrap(), context)
             }
             _ => {
-                eprintln!("Error: Unknown module {module}. Use starship module --list to list out all supported modules.");
+                eprintln!(
+                    "Error: Unknown module {module}. Use starship module --list to list out all supported modules."
+                );
                 None
             }
         }
     };
 
     let elapsed = start.elapsed();
-    log::trace!("Took {:?} to compute module {:?}", elapsed, module);
+    log::trace!("Took {elapsed:?} to compute module {module:?}");
     if elapsed.as_millis() >= 1 {
         // If we take less than 1ms to compute a None, then we will not return a module at all
         // if we have a module: default duration is 0 so no need to change it
@@ -237,6 +268,7 @@ pub fn description(module: &str) -> &'static str {
         "cobol" => "The currently installed version of COBOL/GNUCOBOL",
         "conda" => "The current conda environment, if $CONDA_DEFAULT_ENV is set",
         "container" => "The container indicator, if inside a container.",
+        "cpp" => "your cpp compiler type",
         "crystal" => "The currently installed version of Crystal",
         "daml" => "The Daml SDK version of your project",
         "dart" => "The currently installed version of Dart",
@@ -250,6 +282,7 @@ pub fn description(module: &str) -> &'static str {
         "erlang" => "Current OTP version",
         "fennel" => "The currently installed version of Fennel",
         "fill" => "Fills the remaining space on the line with a pad string",
+        "fortran" => "The currently used version of Fortran",
         "fossil_branch" => "The active branch of the check-out in your current directory",
         "fossil_metrics" => "The currently added/deleted lines in your check-out",
         "gcloud" => "The current GCP client configuration",
@@ -258,6 +291,7 @@ pub fn description(module: &str) -> &'static str {
         "git_metrics" => "The currently added/deleted lines in your repo",
         "git_state" => "The current git operation, and it's progress",
         "git_status" => "Symbol representing the state of the repo",
+        "gleam" => "The currently installed version of Gleam",
         "golang" => "The currently installed version of Golang",
         "gradle" => "The currently installed version of Gradle",
         "guix_shell" => "The guix-shell environment",
@@ -265,6 +299,7 @@ pub fn description(module: &str) -> &'static str {
         "haxe" => "The currently installed version of Haxe",
         "helm" => "The currently installed version of Helm",
         "hg_branch" => "The active branch and topic of the repo in your current directory",
+        "hg_state" => "The current hg operation",
         "hostname" => "The system hostname",
         "java" => "The currently installed version of Java",
         "jobs" => "The current number of jobs running",
@@ -274,14 +309,20 @@ pub fn description(module: &str) -> &'static str {
         "line_break" => "Separates the prompt into two lines",
         "localip" => "The currently assigned ipv4 address",
         "lua" => "The currently installed version of Lua",
+        "maven" => "The Maven Wrapper version of the current project",
         "memory_usage" => "Current system memory and swap usage",
         "meson" => {
             "The current Meson environment, if $MESON_DEVENV and $MESON_PROJECT_NAME are set"
         }
+        "mise" => "The current mise status",
+        "mojo" => "The currently installed version of Mojo",
+        "nats" => "The current NATS context",
+        "netns" => "The current network namespace",
         "nim" => "The currently installed version of Nim",
         "nix_shell" => "The nix-shell environment",
         "nodejs" => "The currently installed version of NodeJS",
         "ocaml" => "The currently installed version of OCaml",
+        "odin" => "The currently installed version of Odin",
         "opa" => "The currently installed version of Open Platform Agent",
         "openstack" => "The current OpenStack cloud and project",
         "os" => "The current operating system",
@@ -289,9 +330,13 @@ pub fn description(module: &str) -> &'static str {
         "perl" => "The currently installed version of Perl",
         "php" => "The currently installed version of PHP",
         "pijul_channel" => "The current channel of the repo in the current directory",
+        "pixi" => {
+            "The currently installed version of Pixi, and the active environment if $PIXI_ENVIRONMENT_NAME is set"
+        }
         "pulumi" => "The current username, stack, and installed version of Pulumi",
         "purescript" => "The currently installed version of PureScript",
         "python" => "The currently installed version of Python",
+        "quarto" => "The current installed version of quarto",
         "raku" => "The currently installed version of Raku",
         "red" => "The currently installed version of Red",
         "rlang" => "The currently installed version of R",
@@ -311,8 +356,10 @@ pub fn description(module: &str) -> &'static str {
         "typst" => "The current installed version of typst",
         "username" => "The active user's username",
         "vagrant" => "The currently installed version of Vagrant",
+        "vcs" => "The currently active VCS repository (first one matching)",
         "vcsh" => "The currently active VCSH repository",
         "vlang" => "The currently installed version of V",
+        "xmake" => "The currently installed version of XMake",
         "zig" => "The currently installed version of Zig",
         _ => "<no description>",
     }

@@ -5,7 +5,7 @@
 1. Завантажити бінарний файл **starship** на Ваш компʼютер
 1. Вказати у вашій оболонці, що ви бажаєте використовувати бінарний файл starship у вигляді командного рядка, змінивши скрипти ініціалізації
 
-Для більшості користувачів чудово підійдуть інструкції на [головній сторінці](/guide/#🚀-installation). Однак, для деяких більш спеціалізованих платформ потрібні інші інструкції.
+Для більшості користувачів чудово підійдуть інструкції на [головній сторінці](../guide/#🚀-installation). Однак, для деяких більш спеціалізованих платформ потрібні інші інструкції.
 
 Існує так багато платформ, що вони не вписуються в основний файл README.md, тож ось деякі інструкції зі встановлення від спільноти для інших платформ. Вашої тут немає? Будь ласка, додайте її сюди, якщо дізнаєтесь!
 
@@ -23,16 +23,10 @@ choco install starship
 
 ## [termux](https://termux.com)
 
-### Вимоги
-
-```sh
-pkg install getconf
-```
-
 ### Встановлення
 
 ```sh
-curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir /data/data/com.termux/files/usr/bin
+pkg install starship
 ```
 
 ## [Funtoo Linux](https://www.funtoo.org/Welcome)
@@ -45,7 +39,7 @@ curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir /data/data/com.term
 emerge app-shells/starship
 ```
 
-## [Nix](https://nixos.wiki/wiki/Nix)
+## [Nix](https://wiki.nixos.org/wiki/Nix)
 
 ### Завантаження бінарного файлу
 

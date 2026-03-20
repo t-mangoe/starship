@@ -9,11 +9,11 @@ use which::which;
 shell. This command evaluates a more complicated script using `source` and
 process substitution.
 
-Directly using `eval` on a shell script causes it to be evaluated in
-a single line, which sucks because things like comments will comment out the
-rest of the script, and you have to spam semicolons everywhere. By using
-source and process substitutions, we make it possible to comment and debug
-the init scripts.
+Directly using `eval` on a shell script without proper quoting causes it to be
+evaluated in a single line, which sucks because things like comments will
+comment out the rest of the script, and you have to spam semicolons
+everywhere. By using source and process substitutions, we make it possible to
+comment and debug the init scripts.
 
 In the future, this may be changed to just directly evaluating the initscript
 using whatever mechanism is available in the host shell--this two-phase solution
@@ -35,7 +35,7 @@ impl StarshipPath {
         let current_exe = self
             .native_path
             .to_str()
-            .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "can't convert to str"))?;
+            .ok_or_else(|| io::Error::other("can't convert to str"))?;
         Ok(current_exe)
     }
 
@@ -65,7 +65,7 @@ impl StarshipPath {
             Ok(output) => output,
             Err(e) => {
                 if e.kind() != io::ErrorKind::NotFound {
-                    log::warn!("Failed to convert \"{}\" to unix path:\n{:?}", str_path, e);
+                    log::warn!("Failed to convert \"{str_path}\" to unix path:\n{e:?}");
                 }
                 // Failed to execute cygpath.exe means there're not inside cygwin environment,return directly.
                 return self.sprint();
@@ -83,7 +83,7 @@ impl StarshipPath {
                 str_path
             }
             Err(e) => {
-                log::warn!("Failed to convert \"{}\" to unix path:\n{}", str_path, e);
+                log::warn!("Failed to convert \"{str_path}\" to unix path:\n{e}");
                 str_path
             }
         };
@@ -95,7 +95,7 @@ impl StarshipPath {
 init code. The stub produces the main init script, then evaluates it with
 `source` and process substitution */
 pub fn init_stub(shell_name: &str) -> io::Result<()> {
-    log::debug!("Shell name: {}", shell_name);
+    log::debug!("Shell name: {shell_name}");
 
     let shell_basename = Path::new(shell_name)
         .file_stem()
@@ -106,8 +106,13 @@ pub fn init_stub(shell_name: &str) -> io::Result<()> {
 
     match shell_basename {
         "bash" => print!(
-            /*
-             * The standard bash bootstrap is:
+            /* We now use the following bootstrap:
+             *      `eval -- "$(starship init bash --print-full-init)"`
+             * which works in any version of Bash from 3.2 to the latest
+             * version and also works in the POSIX mode.
+             *
+             * ----
+             * Historically, the standard bash bootstrap was:
              *      `source <(starship init bash --print-full-init)`
              *
              * Unfortunately there is an issue with bash 3.2 (the MacOS
@@ -129,52 +134,49 @@ pub fn init_stub(shell_name: &str) -> io::Result<()> {
              * with the standard bootstrap, whereas bash 4.1 appears to be
              * consistently compatible.
              *
-             * The upshot of all of this, is that we will use the standard
-             * bootstrap whenever the bash version is 4.1 or higher. Otherwise,
-             * we fall back to the `/dev/stdin` solution.
+             * We had been using the standard bootstrap whenever the bash
+             * version is 4.1 or higher. Otherwise, we fell back to the
+             * `/dev/stdin` solution.
+             *
+             * However, process substitutions <(...) are not supported in the
+             * POSIX mode of Bash <= 5.0, so we switch to the approach with
+             * `eval -- "$(...)"`.  The reason for not using `eval` seems to be
+             * explained at the top of this file, i.e., the script will be
+             * evaluated as if it is a single line, but that is caused by an
+             * improper quoting.
              *
              * More background can be found in these pull requests:
              * https://github.com/starship/starship/pull/241
              * https://github.com/starship/starship/pull/278
+             * https://github.com/starship/starship/issues/1674
+             * https://github.com/starship/starship/pull/5020
+             * https://github.com/starship/starship/issues/5382
              */
-            r#"
-            __main() {{
-                local major="${{BASH_VERSINFO[0]}}"
-                local minor="${{BASH_VERSINFO[1]}}"
-
-                if ((major > 4)) || {{ ((major == 4)) && ((minor >= 1)); }}; then
-                    source <({0} init bash --print-full-init)
-                else
-                    source /dev/stdin <<<"$({0} init bash --print-full-init)"
-                fi
-            }}
-            __main
-            unset -f __main
-            "#,
+            r#"eval -- "$({0} init bash --print-full-init)""#,
             starship.sprint_posix()?
         ),
         "zsh" => print_script(ZSH_INIT, &starship.sprint_posix()?),
         "fish" => print!(
             // Fish does process substitution with pipes and psub instead of bash syntax
-            r#"source ({} init fish --print-full-init | psub)"#,
+            r"source ({} init fish --print-full-init | psub)",
             starship.sprint_posix()?
         ),
         "powershell" => print!(
-            r#"Invoke-Expression (& {} init powershell --print-full-init | Out-String)"#,
+            r"Invoke-Expression (& {} init powershell --print-full-init | Out-String)",
             starship.sprint_pwsh()?
         ),
         "ion" => print!("eval $({} init ion --print-full-init)", starship.sprint()?),
         "elvish" => print!(
-            r#"eval ({} init elvish --print-full-init | slurp)"#,
+            r"eval ({} init elvish --print-full-init | slurp)",
             starship.sprint()?
         ),
         "tcsh" => print!(
-            r#"eval `({} init tcsh --print-full-init)`"#,
+            r"eval `({} init tcsh --print-full-init)`",
             starship.sprint_posix()?
         ),
         "nu" => print_script(NU_INIT, &StarshipPath::init()?.sprint()?),
         "xonsh" => print!(
-            r#"execx($({} init xonsh --print-full-init))"#,
+            r"execx($({} init xonsh --print-full-init))",
             starship.sprint_posix()?
         ),
         "cmd" => print_script(CMDEXE_INIT, &StarshipPath::init()?.sprint_cmdexe()?),
@@ -196,7 +198,7 @@ pub fn init_stub(shell_name: &str) -> io::Result<()> {
                  Please open an issue in the starship repo if you would like to \
                  see support for {shell_basename}:\n\
                  https://github.com/starship/starship/issues/new\n"
-            )
+            );
         }
     };
     Ok(())
@@ -213,7 +215,7 @@ pub fn init_main(shell_name: &str) -> io::Result<()> {
         "fish" => print_script(FISH_INIT, &starship_path.sprint_posix()?),
         "powershell" => print_script(PWSH_INIT, &starship_path.sprint_pwsh()?),
         "ion" => print_script(ION_INIT, &starship_path.sprint()?),
-        "elvish" => print_script(ELVISH_INIT, &starship_path.sprint_posix()?),
+        "elvish" => print_script(ELVISH_INIT, &starship_path.sprint()?),
         "tcsh" => print_script(TCSH_INIT, &starship_path.sprint_posix()?),
         "xonsh" => print_script(XONSH_INIT, &starship_path.sprint_posix()?),
         _ => {

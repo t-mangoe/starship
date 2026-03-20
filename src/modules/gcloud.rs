@@ -1,8 +1,8 @@
 use ini::Ini;
-use once_cell::sync::{Lazy, OnceCell};
 use std::borrow::Cow;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::{LazyLock, OnceLock};
 
 use super::{Context, Module, ModuleConfig};
 
@@ -15,7 +15,7 @@ type Account<'a> = (&'a str, Option<&'a str>);
 struct GcloudContext {
     config_name: String,
     config_path: PathBuf,
-    config: OnceCell<Option<Ini>>,
+    config: OnceLock<Option<Ini>>,
 }
 
 impl<'a> GcloudContext {
@@ -23,7 +23,7 @@ impl<'a> GcloudContext {
         Self {
             config_name: config_name.to_string(),
             config_path: PathBuf::from(config_path),
-            config: Default::default(),
+            config: OnceLock::default(),
         }
     }
 
@@ -73,10 +73,11 @@ fn get_config_dir(context: &Context) -> Option<PathBuf> {
 fn get_active_config(context: &Context, config_dir: &Path) -> Option<String> {
     context.get_env("CLOUDSDK_ACTIVE_CONFIG_NAME").or_else(|| {
         let path = config_dir.join("active_config");
-        match utils::read_file(path) {
-            Ok(data) => data.lines().next().map(String::from),
-            Err(_) => None,
-        }
+        utils::read_file(path)
+            .ok()?
+            .lines()
+            .next()
+            .map(String::from)
     })
 }
 
@@ -89,8 +90,12 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     }
 
     let (config_name, config_path) = get_current_config(context)?;
+
+    if config_name == "NONE" {
+        return None;
+    }
     let gcloud_context = GcloudContext::new(&config_name, &config_path);
-    let account: Lazy<Option<Account<'_>>, _> = Lazy::new(|| gcloud_context.get_account());
+    let account: LazyLock<Option<Account<'_>>, _> = LazyLock::new(|| gcloud_context.get_account());
 
     let parsed = StringFormatter::new(config.format).and_then(|formatter| {
         formatter
@@ -137,7 +142,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
     module.set_segments(match parsed {
         Ok(segments) => segments,
         Err(error) => {
-            log::error!("Error in module `gcloud`: \n{}", error);
+            log::error!("Error in module `gcloud`: \n{error}");
             return None;
         }
     });
@@ -147,7 +152,7 @@ pub fn module<'a>(context: &'a Context) -> Option<Module<'a>> {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{create_dir, File};
+    use std::fs::{File, create_dir};
     use std::io::{self, Write};
 
     use nu_ansi_term::Color;
@@ -463,6 +468,16 @@ project = very-long-project-name
     }
 
     #[test]
+    fn no_active_config() {
+        let actual = ModuleRenderer::new("gcloud")
+            .env("CLOUDSDK_ACTIVE_CONFIG_NAME", "NONE")
+            .collect();
+        let expected = None;
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
     fn active_config_manually_overridden() -> io::Result<()> {
         let dir = tempfile::tempdir()?;
         let active_config_path = dir.path().join("active_config");
@@ -496,7 +511,11 @@ project = overridden
                 format = "on [$symbol$project]($style) "
             })
             .collect();
-        let expected = Some(format!("on {} ", Color::Blue.bold().paint("☁️  overridden")));
+        #[rustfmt::skip]
+        let expected = Some(format!(
+            "on {} ",
+            Color::Blue.bold().paint("☁️  overridden")
+        ));
 
         assert_eq!(actual, expected);
         dir.close()

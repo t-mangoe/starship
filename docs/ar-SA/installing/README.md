@@ -1,19 +1,19 @@
-# التثبيت المتقدم
+# Advanced Installation
 
-To install starship, you need to do two things:
+لثتبيت starship تحتاج للقيام بشيئين هما:
 
-1. Get the **starship** binary onto your computer
-1. Tell your shell to use the starship binary as its prompt by modifying its init scripts
+1. ثبت ملفات **starship** على جهازك
+1. تنبيه موجه الأوامر بإن يقوم بجعل سطر الأوامر ل starship وذلك بتعديل كود الإبتداء
 
-For most users, the instructions on [the main page](/guide/#🚀-installation) will work great. However, for some more specialized platforms, different instructions are needed.
+For most users, the instructions on [the main page](../guide/#🚀-installation) will work great. لكن، من أجل الاستخدام المتقدم، هناك حاجة لتوجيهات أخرى.
 
-There are so many platforms out there that they didn't fit into the main README.md file, so here are some installation instructions for other platforms from the community. Is yours not here? Please do add it here if you figure it out!
+هناك العديد من الحالات التي لا تلبي المعلومات في ملف README.md احتياجها ولذلك هذه بعض إرشادات التثبيت الإضافية مقدمة من مجتمع starship. إذا كانت لديك ملاحظة وقمت بحلها ولم تجد هذا الحل لها ضمن الحلول التالية، الرجاء أضفها هنا!
 
 ## [Chocolatey](https://chocolatey.org)
 
 ### المتطلبات الأساسية
 
-Head over to the [Chocolatey installation page](https://chocolatey.org/install) and follow the instructions to install Chocolatey.
+إذهب إلى  [ صفحة تثبيت Chocolatey   ](https://chocolatey.org/install)  و اتبع الإرشادات لتثبيت البرنامج.
 
 ### التثبيت
 
@@ -23,41 +23,35 @@ choco install starship
 
 ## [termux](https://termux.com)
 
-### المتطلبات الأساسية
-
-```sh
-pkg install getconf
-```
-
 ### التثبيت
 
 ```sh
-curl -sS https://starship.rs/install.sh | sh -s -- --bin-dir /data/data/com.termux/files/usr/bin
+pkg install starship
 ```
 
 ## [Funtoo Linux](https://www.funtoo.org/Welcome)
 
 ### التثبيت
 
-On Funtoo Linux, starship can be installed from [core-kit](https://github.com/funtoo/core-kit/tree/1.4-release/app-shells/starship) via Portage:
+يمكن تثبيت starship في Funtoo linux باستخدام  [core-kit](https://github.com/funtoo/core-kit/tree/1.4-release/app-shells/starship) via Portage:
 
 ```sh
 emerge app-shells/starship
 ```
 
-## [Nix](https://nixos.wiki/wiki/Nix)
+## [Nix](https://wiki.nixos.org/wiki/Nix)
 
-### Getting the Binary
+### احصل على ملفات الباينري
 
-#### Imperatively
+#### بشكل مباشر
 
 ```sh
 nix-env -iA nixos.starship
 ```
 
-#### Declarative, single user, via [home-manager](https://github.com/nix-community/home-manager)
+#### بشكل تصريحي، من أجل مستخدم واحد، عبر [home-manager](https://github.com/nix-community/home-manager)
 
-Enable the `programs.starship` module in your `home.nix` file, and add your settings
+مكن كود`programs.starship` في  ملف`home.nix` و أضف إلى الإعدادات الإعدادات التالية
 
 ```nix
 {
@@ -78,15 +72,15 @@ Enable the `programs.starship` module in your `home.nix` file, and add your sett
 }
 ```
 
-then run
+ثم بعد ذلك شغل
 
 ```sh
 home-manager switch
 ```
 
-#### Declarative, system-wide, with NixOS
+#### بشكل تصريحي، لعدة مستخدمين
 
-Add `pkgs.starship` to `environment.systemPackages` in your `configuration.nix`, then run
+أضف `pkgs.starship` إلى `environment.systemPackages` في  `configuration.nix`, بعد ذلك شغل
 
 ```sh
 sudo nixos-rebuild switch

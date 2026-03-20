@@ -1,5 +1,5 @@
 use crate::shadow;
-use crate::utils::{self, exec_cmd};
+use crate::utils::{self, DEFAULT_COMMAND_TIMEOUT_MS, exec_cmd};
 use nu_ansi_term::Style;
 
 use std::fs;
@@ -25,7 +25,10 @@ pub fn create() {
         Style::new().bold().paint("Generated bug report:")
     );
     println!("Forward the pre-filled report above to GitHub in your browser?");
-    println!("{} To avoid any sensitive data from being exposed, please review the included information before proceeding. Data forwarded to GitHub is subject to GitHub's privacy policy.", Style::new().bold().paint("Warning:"));
+    println!(
+        "{} To avoid any sensitive data from being exposed, please review the included information before proceeding. Data forwarded to GitHub is subject to GitHub's privacy policy.",
+        Style::new().bold().paint("Warning:")
+    );
     println!(
         "Enter `{}` to accept, or anything else to decline, and `{}` to confirm your choice:\n",
         Style::new().bold().paint("y"),
@@ -39,10 +42,14 @@ pub fn create() {
         let link = make_github_issue_link(&issue_body);
         if let Err(e) = open::that(&link) {
             println!("Failed to open issue report in your browser: {e}");
-            println!("Please copy the above report and open an issue manually, or try opening the following link:\n{link}");
+            println!(
+                "Please copy the above report and open an issue manually, or try opening the following link:\n{link}"
+            );
         }
     } else {
-        println!("Will not open an issue in your browser! Please copy the above report and open an issue manually.");
+        println!(
+            "Will not open an issue in your browser! Please copy the above report and open an issue manually."
+        );
     }
     println!("Thanks for using the Starship bug report tool!");
 }
@@ -62,6 +69,7 @@ struct Environment {
 }
 
 fn get_pkg_branch_tag() -> &'static str {
+    #[allow(clippy::const_is_empty)]
     if !shadow::TAG.is_empty() {
         return shadow::TAG;
     }
@@ -201,8 +209,7 @@ fn get_terminal_info() -> TerminalInfo {
 
 fn get_config_path(shell: &str) -> Option<PathBuf> {
     if shell == "nu" {
-        return dirs_next::config_dir()
-            .map(|config_dir| config_dir.join("nushell").join("config.nu"));
+        return dirs::config_dir().map(|config_dir| config_dir.join("nushell").join("config.nu"));
     }
 
     utils::home_dir().and_then(|home_dir| {
@@ -243,7 +250,7 @@ fn get_starship_config() -> String {
 }
 
 fn get_shell_version(shell: &str) -> String {
-    let time_limit = Duration::from_millis(500);
+    let time_limit = Duration::from_millis(DEFAULT_COMMAND_TIMEOUT_MS);
     match shell {
         "powershell" => exec_cmd(
             shell,

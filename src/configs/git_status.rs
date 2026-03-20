@@ -22,15 +22,24 @@ pub struct GitStatusConfig<'a> {
     pub staged: &'a str,
     pub untracked: &'a str,
     pub typechanged: &'a str,
+    pub worktree_added: &'a str,
+    pub worktree_deleted: &'a str,
+    pub worktree_modified: &'a str,
+    pub worktree_typechanged: &'a str,
+    pub index_added: &'a str,
+    pub index_deleted: &'a str,
+    pub index_modified: &'a str,
+    pub index_typechanged: &'a str,
     pub ignore_submodules: bool,
     pub disabled: bool,
+    pub use_git_executable: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub windows_starship: Option<&'a str>,
 }
 
-impl<'a> Default for GitStatusConfig<'a> {
+impl Default for GitStatusConfig<'_> {
     fn default() -> Self {
-        GitStatusConfig {
+        Self {
             format: "([\\[$all_status$ahead_behind\\]]($style) )",
             style: "red bold",
             stashed: "\\$",
@@ -45,8 +54,17 @@ impl<'a> Default for GitStatusConfig<'a> {
             staged: "+",
             untracked: "?",
             typechanged: "",
+            worktree_added: "",
+            worktree_deleted: "",
+            worktree_modified: "",
+            worktree_typechanged: "",
+            index_added: "",
+            index_deleted: "",
+            index_modified: "",
+            index_typechanged: "",
             ignore_submodules: false,
             disabled: false,
+            use_git_executable: false,
             windows_starship: None,
         }
     }

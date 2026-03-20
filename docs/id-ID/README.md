@@ -1,10 +1,14 @@
 ---
-home: true
-heroImage: /logo.svg
-heroText:
-tagline: Prompt yang minimal, super cepat, dan dapat disesuaikan tanpa batas untuk shell apa pun!
-actionText: Mari Mulai →
-actionLink: ./guide/
+layout: home
+hero:
+  image: /logo.svg
+  text:
+  tagline: Prompt yang minimal, super cepat, dan dapat disesuaikan tanpa batas untuk shell apa pun!
+  actions:
+    - 
+      theme: brand
+      text: Mari Mulai →
+      link: ./guide/
 features:
   - 
     title: Kompatibilitas Yang Utama
@@ -21,12 +25,24 @@ metaTitle: "Starship: Prompt Lintas Shell"
 description: Starship merupakan sebuah prompt yang minimal, super cepat, dan sangat bisa untuk dikustomisasi untuk shell apapun! Bisa menampilkan informasi yang kamu butuhkan, namun tetap bisa tampil dengan ramping dan minimal. Instalasi sederhana tersedia untuk Bash, Fish, ZSH, Ion, Tcsh, Elvish, Nu, Xonsh, Cmd, dan PowerShell.
 ---
 
-<div class="center">
-  <video class="demo-video" muted autoplay loop playsinline>
-    <source src="/demo.webm" type="video/webm">
-    <source src="/demo.mp4" type="video/mp4">
-  </video>
-</div>
+<script setup>
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.has('uwu') || urlParams.has('kawaii')) {
+    const img = document.querySelector('.VPHero .VPImage.image-src')
+    img.classList.add('uwu')
+    img.src = '/logo-uwu.png'
+    img.alt = 'Kawaii Starship Logo by @sawaratsuki1004'
+  }
+})
+</script>
+
+<video class="demo-video" muted autoplay loop playsinline>
+  <source src="/demo.webm" type="video/webm">
+  <source src="/demo.mp4" type="video/mp4">
+</video>
 
 ### Prasyarat
 
@@ -55,6 +71,7 @@ description: Starship merupakan sebuah prompt yang minimal, super cepat, dan san
    ```sh
    brew install starship
    ```
+
    With [Winget](https://github.com/microsoft/winget-cli):
 
    ```powershell
@@ -119,19 +136,16 @@ description: Starship merupakan sebuah prompt yang minimal, super cepat, dan san
 
    #### Elvish
 
-   ::: warning
+   > [!WARNING] Only elvish v0.18 or higher is supported.
 
-   Hanya elvish v0.18 atau versi yang lebih baru yang mendapat dukungan pengembangan.
-
-   :::
-
-   Tambahkan skrip berikut pada baris akhir `~/.elvish/rc.elv`:
+   Add the following to the end of `~/.config/elvish/rc.elv` (`%AppData%\elvish\rc.elv` on Windows):
 
    ```sh
    # ~/.elvish/rc.elv
 
    eval (starship init elvish)
    ```
+   For elvish versions prior to v0.21.0 the config file might instead be `~/.elvish/rc.elv`
 
 
    #### Tcsh
@@ -147,22 +161,13 @@ description: Starship merupakan sebuah prompt yang minimal, super cepat, dan san
 
    #### Nushell
 
-   ::: warning
+   > [!WARNING] This will change in the future. Hanya Nushell v0.96+ yang menerima dukungan.
 
-   Hal ini dapat berubah di kemudian hari. Hanya Nushell v0.78+ yang menerima dukungan.
-
-   :::
-
-   Add the following to the end of your Nushell env file (find it by running `$nu.env-path` in Nushell):
-   ```sh
-   mkdir ~/.cache/starship
-   starship init nu | save -f ~/.cache/starship/init.nu
-   ```
-
-   Lalu tambahkan baris berikut di baris terakhir konfigurasi Nushell (temukan dengan menjalankan `$nu.config-path`):
+   Add the following to the end of your Nushell configuration (find it by running `$nu.config-path` in Nushell):
 
    ```sh
-   use ~/.cache/starship/init.nu
+   mkdir ($nu.data-dir | path join "vendor/autoload")
+   starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
    ```
 
 

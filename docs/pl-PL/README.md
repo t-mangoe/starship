@@ -1,10 +1,14 @@
 ---
-home: true
-heroImage: /logo.svg
-heroText:
-tagline: Minimalny, szybki i nieskończenie konfigurowalny wiersz poleceń dla dowolnej powłoki!
-actionText: Pierwsze kroki →
-actionLink: ./guide/
+layout: home
+hero:
+  image: /logo.svg
+  text:
+  tagline: Minimalny, szybki i nieskończenie konfigurowalny wiersz poleceń dla dowolnej powłoki!
+  actions:
+    - 
+      theme: brand
+      text: Pierwsze kroki →
+      link: ./guide/
 features:
   - 
     title: Kompatybilność przede wszystkim
@@ -21,12 +25,24 @@ metaTitle: "Starship: Wiersz poleceń dla dowolnej powłoki"
 description: Starship to minimalny, szybki i ekstremalnie konfigurowalny wiersz poleceń dla każdej powłoki! Pokazuje informacje których potrzebujesz, pozostając elegancki i minimalny. Szybka instalacja dostępna dla powłok Bash, Fish, ZSH, Ion, Tcsh, Elvish, Nu, Xonsh, Cmd i PowerShell.
 ---
 
-<div class="center">
-  <video class="demo-video" muted autoplay loop playsinline>
-    <source src="/demo.webm" type="video/webm">
-    <source src="/demo.mp4" type="video/mp4">
-  </video>
-</div>
+<script setup>
+import { onMounted } from 'vue'
+
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search)
+  if (urlParams.has('uwu') || urlParams.has('kawaii')) {
+    const img = document.querySelector('.VPHero .VPImage.image-src')
+    img.classList.add('uwu')
+    img.src = '/logo-uwu.png'
+    img.alt = 'Kawaii Starship Logo by @sawaratsuki1004'
+  }
+})
+</script>
+
+<video class="demo-video" muted autoplay loop playsinline>
+  <source src="/demo.webm" type="video/webm">
+  <source src="/demo.mp4" type="video/mp4">
+</video>
 
 ### Wymagania wstępne
 
@@ -55,6 +71,7 @@ description: Starship to minimalny, szybki i ekstremalnie konfigurowalny wiersz 
    ```sh
    brew install starship
    ```
+
    Za pomocą [Winget](https://github.com/microsoft/winget-cli):
 
    ```powershell
@@ -119,19 +136,16 @@ description: Starship to minimalny, szybki i ekstremalnie konfigurowalny wiersz 
 
    #### Elvish
 
-   ::: warning
+   > [!WARNING] Only elvish v0.18 or higher is supported.
 
-   Działa tylko dla elvish v0.18 albo wyższej wersji.
-
-   :::
-
-   Dodaj na koniec pliku `~/.elvish/rc.elv`:
+   Add the following to the end of `~/.config/elvish/rc.elv` (`%AppData%\elvish\rc.elv` on Windows):
 
    ```sh
    # ~/.elvish/rc.elv
 
    eval (starship init elvish)
    ```
+   For elvish versions prior to v0.21.0 the config file might instead be `~/.elvish/rc.elv`
 
 
    #### Tcsh
@@ -147,22 +161,13 @@ description: Starship to minimalny, szybki i ekstremalnie konfigurowalny wiersz 
 
    #### Nushell
 
-   ::: warning
+   > [!WARNING] This will change in the future. Działa tylko na Nushell v0.96+.
 
-   Ten sposób zmieni się w przyszłości. Działa tylko na Nushell v0.78+.
-
-   :::
-
-   Dodaj następujący kod na koniec twojego pliku env Nushell (możesz go znaleść za pomocą `$nu.env-path` w Nushell):
-   ```sh
-   mkdir ~/.cache/starship
-   starship init nu | save -f ~/.cache/starship/init.nu
-   ```
-
-   Dodaj następujący kod na koniec Twojego pliku konfiguracyjnego Nushell (możesz go znaleźć uruchamiając `$nu.config-path`):
+   Add the following to the end of your Nushell configuration (find it by running `$nu.config-path` in Nushell):
 
    ```sh
-   use ~/.cache/starship/init.nu
+   mkdir ($nu.data-dir | path join "vendor/autoload")
+   starship init nu | save -f ($nu.data-dir | path join "vendor/autoload/starship.nu")
    ```
 
 
